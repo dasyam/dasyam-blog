@@ -3,6 +3,11 @@ import BaseHead from '../components/BaseHead.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import { SITE_TITLE, SITE_DESCRIPTION } from '../consts';
+import { getCollection } from 'astro:content';
+
+const posts = await getCollection('blog');
+const sortedPosts = posts.sort((a, b) => new Date(b.data.pubDate) - new Date(a.data.pubDate));
+
 ---
 
 <!doctype html>
@@ -13,13 +18,21 @@ import { SITE_TITLE, SITE_DESCRIPTION } from '../consts';
 	<body>
 		<Header />
 		<main>
-			<h1>🧑‍🚀 Hello, Astronaut!</h1>
+			<h1>🧑‍🚀 Hello, Traveller!</h1>
 			<p>
-				Welcome to the official <a href="https://astro.build/">Astro</a> blog starter template. This
-				template serves as a lightweight, minimally-styled starting point for anyone looking to build
-				a personal website, blog, or portfolio with Astro.
+				Welcome to Tapovana, my blog space tucked away in the corners of the internet.
 			</p>
-			<p>
+
+			
+	      <ul>
+	        {sortedPosts.map(post => (
+	          <li>
+	            <a href={`/blog/${post.data.slug || post.id}/`}>{post.data.title}</a> — {new Date(post.data.pubDate).toDateString()}
+	          </li>
+	        ))}
+	      </ul>
+
+			<!-- <p>
 				This template comes with a few integrations already configured in your
 				<code>astro.config.mjs</code> file. You can customize your setup with
 				<a href="https://astro.build/integrations">Astro Integrations</a> to add tools like Tailwind,
@@ -42,8 +55,9 @@ import { SITE_TITLE, SITE_DESCRIPTION } from '../consts';
 				Looking for a blog template with a bit more personality? Check out
 				<a href="https://github.com/Charca/astro-blog-template">astro-blog-template</a>
 				by <a href="https://twitter.com/Charca">Maxi Ferreira</a>.
-			</p>
+			</p> -->
 		</main>
+
 		<Footer />
 	</body>
 </html>
