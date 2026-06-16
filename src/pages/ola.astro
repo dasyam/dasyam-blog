@@ -1,0 +1,29 @@
+---
+import Analytics from '@vercel/analytics/astro';
+---
+
+<Analytics mode="production" />
+
+<html lang="en">
+<head>
+  <title>Ola Auto</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    html, body {
+      margin: 0;
+      height: 100%;
+      background: #f7f7f7;
+    }
+
+    iframe {
+      width: 100%;
+      height: 100vh;
+      border: none;
+    }
+  </style>
+</head>
+
+<body>
+  <iframe src="/ola.pdf"></iframe>
+</body>
+</html>
