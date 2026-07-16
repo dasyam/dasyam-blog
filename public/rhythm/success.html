@@ -1,4 +1,4 @@
-<!-- Build: V0.2.2 (landing page + payment flow) -->
+<!-- Build: V0.2.5 (landing page + payment flow + analytics) -->
 <!-- Deliberately short: only job is to close the loop on "did that actually
      work" and point to WhatsApp as the next place to look. Full entitlement
      detail already lives on the paywall screen (just seen) and WA Template 1
@@ -12,6 +12,12 @@
 <meta name="description" content="You're in. Check WhatsApp to set up your onboarding call.">
 <meta name="theme-color" content="#db8b57">
 <meta name="color-scheme" content="light">
+
+<!-- Preconnects for analytics (still lazy-loaded below) -->
+<link rel="preconnect" href="https://www.googletagmanager.com" crossorigin>
+<link rel="dns-prefetch" href="https://www.googletagmanager.com">
+<link rel="preconnect" href="https://www.clarity.ms" crossorigin>
+<link rel="dns-prefetch" href="https://www.clarity.ms">
 
 <script src="https://cdn.tailwindcss.com"></script>
 <script>
@@ -27,6 +33,43 @@
       }
     }
   }
+</script>
+<!-- === Lazy-load Analytics: GA4 + Clarity ===
+     Deferred until first user interaction (or idle, whichever comes first)
+     so it never competes with the initial paint. Same pattern used on
+     pcosclarity.com. IDs are Rhythm-specific (GA4 property + Clarity
+     project created 2026-07-16) — do not reuse pcosclarity's IDs here. -->
+<script>
+(function lazyAnalytics(){
+  let loaded = false;
+  function loadAnalytics() {
+    if (loaded) return;
+    loaded = true;
+
+    const ga = document.createElement('script');
+    ga.async = true;
+    ga.src = 'https://www.googletagmanager.com/gtag/js?id=G-SXWZ5613QV';
+    document.head.appendChild(ga);
+    ga.onload = () => {
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){ dataLayer.push(arguments); }
+      window.gtag = gtag;
+      gtag('js', new Date());
+      gtag('config', 'G-SXWZ5613QV');
+    };
+
+    const cl = document.createElement('script');
+    cl.defer = true;
+    cl.innerHTML = '(function(c,l,a,r,i,t,y){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);})(window, document, "clarity", "script", "xnay3et4bz");';
+    document.head.appendChild(cl);
+  }
+  const start = () => { loadAnalytics(); remove(); };
+  function remove(){
+    ['scroll','mousedown','touchstart','keydown'].forEach(ev => window.removeEventListener(ev, start, { passive: true }));
+  }
+  ['scroll','mousedown','touchstart','keydown'].forEach(ev => window.addEventListener(ev, start, { passive: true }));
+  (window.requestIdleCallback || function(f){ setTimeout(f,1500); })(loadAnalytics);
+})();
 </script>
 </head>
 <body class="bg-white text-slate-800 antialiased">
