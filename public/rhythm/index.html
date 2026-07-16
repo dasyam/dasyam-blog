@@ -1,0 +1,549 @@
+<!-- Build: V0.2.2 (landing page + payment flow) -->
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Better nights. Clearer mornings.</title>
+<meta name="description" content="One small step for tonight, sent straight to WhatsApp.">
+<meta name="theme-color" content="#db8b57">
+<meta name="color-scheme" content="light">
+
+<!-- Tailwind used across the whole page now (previously mixed with hand-rolled
+     CSS, which caused Tailwind's preflight reset to fight our custom h1/h2
+     rules and shrink the headline). One system end to end avoids that. -->
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          accent: {
+            50:'#fdf3ea', 100:'#fbeadd', 200:'#f3d3b3', 300:'#e8b587',
+            500:'#db8b57', 600:'#db8b57', 700:'#93521f'
+          }
+        }
+      }
+    }
+  }
+</script>
+</head>
+<body class="bg-white text-slate-800 antialiased">
+
+<!--
+  ============================================================
+  HEADER — currently unused. Public brand name is deliberately
+  deferred (see CURRENT_STATE / landing copy doc). Uncomment and
+  fill in a wordmark once naming is locked at Week 3+.
+  ============================================================
+
+  <header class="sticky top-0 z-30 border-b border-slate-200 bg-white/80 backdrop-blur">
+    <div class="mx-auto flex h-14 max-w-[540px] items-center justify-between px-6">
+      <a href="#top" aria-label="Home" class="flex items-center gap-2">
+        <span class="h-8 w-8 rounded-xl bg-accent-600 flex items-center justify-center">
+          <span class="h-2 w-2 rounded-full bg-white"></span>
+        </span>
+      </a>
+      <a href="#form" class="rounded-xl bg-accent-600 px-3 py-2 text-sm font-semibold text-white hover:bg-accent-700">Get started</a>
+    </div>
+  </header>
+-->
+
+<div class="mx-auto max-w-[540px] px-6">
+
+  <!-- HERO -->
+  <section id="top" class="border-b border-slate-200 pb-14 pt-12">
+    <div class="mb-4 inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-accent-700">
+      <span class="h-2 w-2 rotate-[-45deg] rounded-[50%_50%_50%_0] bg-accent-600"></span>Private invite
+    </div>
+    <h1 class="mb-4 text-4xl font-extrabold leading-tight tracking-tight text-slate-900 sm:text-5xl">
+      Better nights.<br><span class="text-accent-700">Clearer mornings.</span>
+    </h1>
+    <p class="mb-8 text-lg text-slate-700">One small step for tonight, sent straight to WhatsApp. Nothing to plan, no sleep diary to maintain.</p>
+    <a href="#form" class="flex w-full items-center justify-center rounded-2xl bg-accent-600 px-6 py-4 text-base font-bold text-white shadow hover:bg-accent-700 transition-colors">Get started</a>
+  </section>
+
+  <!-- PROBLEM MIRROR -->
+  <section class="border-b border-slate-200 py-14">
+    <div class="mb-4 inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-accent-700">
+      <span class="h-2 w-2 rotate-[-45deg] rounded-[50%_50%_50%_0] bg-accent-600"></span>The real problem
+    </div>
+    <p class="mb-3 text-lg text-slate-900/80">Sleep earlier. Wind down properly. Follow a bedtime routine.</p>
+    <p class="mb-3 text-slate-600">Most nights, the problem isn't knowing what would help. It's finding something that feels doable.</p>
+    <p class="text-slate-900">This keeps it simple: one small step. One night at a time.</p>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section class="border-b border-slate-200 py-14">
+    <div class="mb-2 inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-accent-700">
+      <span class="h-2 w-2 rotate-[-45deg] rounded-[50%_50%_50%_0] bg-accent-600"></span>How it works
+    </div>
+    <div>
+      <div class="flex gap-4 border-t border-slate-200 py-5 first:border-t-0">
+        <div class="min-w-[28px] pt-0.5 text-lg font-extrabold text-accent-700">01</div>
+        <div>
+          <h3 class="mb-1 font-semibold text-slate-900">Tell us about your evenings</h3>
+          <p class="text-sm text-slate-600">Answer a few quick questions. Around two minutes.</p>
+        </div>
+      </div>
+      <div class="flex gap-4 border-t border-slate-200 py-5">
+        <div class="min-w-[28px] pt-0.5 text-lg font-extrabold text-accent-700">02</div>
+        <div>
+          <h3 class="mb-1 font-semibold text-slate-900">Have a short call</h3>
+          <p class="text-sm text-slate-600">A 5-minute WhatsApp call to understand where your evenings usually get stuck.</p>
+        </div>
+      </div>
+      <div class="flex gap-4 border-t border-slate-200 py-5">
+        <div class="min-w-[28px] pt-0.5 text-lg font-extrabold text-accent-700">03</div>
+        <div>
+          <h3 class="mb-1 font-semibold text-slate-900">Get one step for tonight</h3>
+          <p class="text-sm text-slate-600">Each evening, one quick check-in and one small action for that night, sent on WhatsApp.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- NO NEW SYSTEM -->
+  <section class="border-b border-slate-200 py-14">
+    <div class="mb-4 inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-accent-700">
+      <span class="h-2 w-2 rotate-[-45deg] rounded-[50%_50%_50%_0] bg-accent-600"></span>What this isn't
+    </div>
+    <h2 class="mb-3 text-2xl font-bold text-slate-900">No new system to maintain</h2>
+    <ul>
+      <li class="flex items-center gap-3 border-t border-slate-200 py-3 text-sm text-slate-600 first:border-t-0">
+        <span class="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-slate-100 text-xs text-slate-500">✕</span>No app to download
+      </li>
+      <li class="flex items-center gap-3 border-t border-slate-200 py-3 text-sm text-slate-600">
+        <span class="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-slate-100 text-xs text-slate-500">✕</span>No sleep diary to maintain
+      </li>
+      <li class="flex items-center gap-3 border-t border-slate-200 py-3 text-sm text-slate-600">
+        <span class="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-slate-100 text-xs text-slate-500">✕</span>No dashboard or streaks
+      </li>
+      <li class="flex items-center gap-3 border-t border-slate-200 py-3 text-sm text-slate-600">
+        <span class="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-slate-100 text-xs text-slate-500">✕</span>No full routine to follow
+      </li>
+      <li class="flex items-center gap-3 border-t border-slate-200 py-3 text-sm font-semibold text-slate-900">
+        <span class="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-accent-600 text-xs text-white">✓</span>Just one small step each evening
+      </li>
+    </ul>
+  </section>
+
+  <!-- WHY STARTING SMALL -->
+  <section class="border-b border-slate-200 py-14">
+    <div class="mb-4 inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-accent-700">
+      <span class="h-2 w-2 rotate-[-45deg] rounded-[50%_50%_50%_0] bg-accent-600"></span>Why now
+    </div>
+    <h2 class="mb-3 text-2xl font-bold text-slate-900">Why we're starting small</h2>
+    <p class="mb-3 text-slate-600">This is currently open to a small number of people.</p>
+    <p class="mb-8 text-slate-600">That means every participant gets a real onboarding conversation and a person overseeing the experience from the start.</p>
+    <a href="#form" class="flex w-full items-center justify-center rounded-2xl bg-accent-600 px-6 py-4 text-base font-bold text-white shadow hover:bg-accent-700 transition-colors">Get started</a>
+  </section>
+
+  <!-- FORM -->
+  <section id="form" class="border-b border-slate-200 py-14">
+    <div class="mb-2 inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-accent-700">
+      <span class="h-2 w-2 rotate-[-45deg] rounded-[50%_50%_50%_0] bg-accent-600"></span>Two minutes
+    </div>
+    <h2 class="mb-7 text-2xl font-bold text-slate-900">Tell us about your evenings</h2>
+
+    <form id="signup-form" novalidate class="grid gap-5">
+      <div>
+        <label class="text-sm font-semibold text-slate-900" for="q-name">What should we call you?</label>
+        <p class="mb-1 text-xs text-slate-500">Your name 😊</p>
+        <input id="q-name" name="name" type="text" required
+          class="w-full rounded-xl border border-slate-300 px-3.5 py-3 text-base focus:border-accent-500 focus:outline-none focus:ring focus:ring-accent-100" />
+        <p id="err-name" class="mt-1.5 hidden text-xs font-medium text-rose-600">Let us know what to call you.</p>
+      </div>
+
+      <div>
+        <label class="text-sm font-semibold text-slate-900">What do you want to improve right now?</label>
+        <div class="mt-2 grid gap-2" id="q-goal">
+          <label class="flex items-start gap-3 rounded-xl border border-slate-300 px-3.5 py-3 cursor-pointer hover:border-slate-400 has-[:checked]:border-accent-500 has-[:checked]:bg-accent-50">
+            <input type="radio" name="goal" value="better-nights" class="mt-1 h-4 w-4 border-slate-300 accent-accent-600" />
+            <span class="text-sm text-slate-700">🛌 Better nights (sleep earlier / reduce scrolling)</span>
+          </label>
+          <label class="flex items-start gap-3 rounded-xl border border-slate-300 px-3.5 py-3 cursor-pointer hover:border-slate-400 has-[:checked]:border-accent-500 has-[:checked]:bg-accent-50">
+            <input type="radio" name="goal" value="better-mornings" class="mt-1 h-4 w-4 border-slate-300 accent-accent-600" />
+            <span class="text-sm text-slate-700">🌄 Better mornings (wake up with more clarity)</span>
+          </label>
+          <label class="flex items-start gap-3 rounded-xl border border-slate-300 px-3.5 py-3 cursor-pointer hover:border-slate-400 has-[:checked]:border-accent-500 has-[:checked]:bg-accent-50">
+            <input type="radio" name="goal" value="sleep-quality" class="mt-1 h-4 w-4 border-slate-300 accent-accent-600" />
+            <span class="text-sm text-slate-700">Sleep quality (fewer wake-ups / deeper sleep)</span>
+          </label>
+          <label class="flex items-start gap-3 rounded-xl border border-slate-300 px-3.5 py-3 cursor-pointer hover:border-slate-400 has-[:checked]:border-accent-500 has-[:checked]:bg-accent-50">
+            <input type="radio" name="goal" value="all" class="mt-1 h-4 w-4 border-slate-300 accent-accent-600" />
+            <span class="text-sm text-slate-700">All of the above</span>
+          </label>
+        </div>
+        <p id="err-goal" class="mt-1.5 hidden text-xs font-medium text-rose-600">Pick one so we know where to start.</p>
+      </div>
+
+      <div>
+        <label class="text-sm font-semibold text-slate-900" for="q-routine">What does your usual evening routine look like?</label>
+        <p class="mb-1 text-xs text-slate-500">Example: Coffee by 4pm, dinner by 9pm, phone till 10pm, sleep by 11.</p>
+        <textarea id="q-routine" name="routine" rows="3" required
+          class="w-full rounded-xl border border-slate-300 px-3.5 py-3 text-base focus:border-accent-500 focus:outline-none focus:ring focus:ring-accent-100"></textarea>
+        <p id="err-routine" class="mt-1.5 hidden text-xs font-medium text-rose-600">Give us a quick sketch, a line or two is enough.</p>
+      </div>
+
+      <div>
+        <label class="text-sm font-semibold text-slate-900">Is any of the following true for you right now?</label>
+        <div class="mt-2 grid gap-2" id="q-screen">
+          <label class="flex items-start gap-3 rounded-xl border border-slate-300 px-3.5 py-3 cursor-pointer hover:border-slate-400 has-[:checked]:border-accent-500 has-[:checked]:bg-accent-50">
+            <input type="checkbox" name="screen" value="diagnosed" class="gate mt-1 h-4 w-4 rounded border-slate-300 accent-accent-600" />
+            <span class="text-sm text-slate-700">I have been diagnosed with a sleep disorder</span>
+          </label>
+          <label class="flex items-start gap-3 rounded-xl border border-slate-300 px-3.5 py-3 cursor-pointer hover:border-slate-400 has-[:checked]:border-accent-500 has-[:checked]:bg-accent-50">
+            <input type="checkbox" name="screen" value="shiftwork" class="gate mt-1 h-4 w-4 rounded border-slate-300 accent-accent-600" />
+            <span class="text-sm text-slate-700">I regularly work night or rotating shifts</span>
+          </label>
+          <label class="flex items-start gap-3 rounded-xl border border-slate-300 px-3.5 py-3 cursor-pointer hover:border-slate-400 has-[:checked]:border-accent-500 has-[:checked]:bg-accent-50">
+            <input type="checkbox" name="screen" value="seeking-help" class="gate mt-1 h-4 w-4 rounded border-slate-300 accent-accent-600" />
+            <span class="text-sm text-slate-700">I am currently seeking help for severe or persistent sleep problems</span>
+          </label>
+          <label class="flex items-start gap-3 rounded-xl border border-slate-300 px-3.5 py-3 cursor-pointer hover:border-slate-400 has-[:checked]:border-accent-500 has-[:checked]:bg-accent-50">
+            <input type="checkbox" id="q-screen-none" name="screen" value="none" class="mt-1 h-4 w-4 rounded border-slate-300 accent-accent-600" />
+            <span class="text-sm text-slate-700">None of these</span>
+          </label>
+        </div>
+        <p id="err-screen" class="mt-1.5 hidden text-xs font-medium text-rose-600">Please select an option, including "None of these" if none apply.</p>
+      </div>
+
+      <div>
+        <label class="text-sm font-semibold text-slate-900" for="q-whatsapp">WhatsApp number</label>
+        <p class="mb-1 text-xs text-slate-500">We'll message you here to set up a short call. No spam.</p>
+        <div id="wa-wrap" class="flex rounded-xl border border-slate-300 overflow-hidden focus-within:border-accent-500 focus-within:ring focus-within:ring-accent-100">
+          <span class="flex items-center border-r border-slate-300 bg-accent-50 px-3 text-sm font-semibold text-slate-700">+91</span>
+          <input id="q-whatsapp" name="whatsapp" type="tel" inputmode="numeric" pattern="[0-9]{10}" maxlength="10" placeholder="98765 43210" required
+            class="flex-1 border-0 px-3.5 py-3 text-base outline-none" />
+        </div>
+        <p id="err-whatsapp" class="mt-1.5 hidden text-xs font-medium text-rose-600">Enter a valid 10-digit number, no spaces or country code.</p>
+      </div>
+
+      <div class="cf-turnstile" data-sitekey="0x4AAAAAAD2avPUx-CP9vn9q"
+        data-callback="onTurnstileSuccess" data-expired-callback="onTurnstileExpired"
+        data-error-callback="onTurnstileExpired"></div>
+
+      <button type="submit" id="submit-btn" disabled
+        class="mt-2 flex w-full items-center justify-center rounded-2xl bg-accent-600 px-5 py-4 text-base font-bold text-white shadow hover:bg-accent-700 disabled:cursor-not-allowed disabled:opacity-40">
+        Continue
+      </button>
+    </form>
+
+    <div id="decline-message" class="mt-4 hidden rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+      <p class="text-slate-800">Thanks so much for sharing this with us 🙏</p>
+      <p class="mt-3 text-slate-600">Right now, this program is built specifically for evening routines and behavior change. It doesn't cover medical sleep conditions, so we're not the right fit just yet.</p>
+      <p class="mt-3 text-slate-600">If we expand to support this in future, we'll be sure to reach out.</p>
+      <p class="mt-3 text-slate-600">Wishing you good rest in the meantime.</p>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section id="faq" class="border-b border-slate-200 py-14">
+    <div class="mb-2 inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-accent-700">
+      <span class="h-2 w-2 rotate-[-45deg] rounded-[50%_50%_50%_0] bg-accent-600"></span>Questions
+    </div>
+    <div>
+      <details class="group border-t border-slate-200 py-4 first:border-t-0">
+        <summary class="flex cursor-pointer list-none items-center justify-between font-semibold text-slate-900">
+          Who is this for?
+          <span class="ml-4 text-xl font-bold text-accent-600 transition-transform group-open:rotate-45">+</span>
+        </summary>
+        <p class="mt-2 text-sm text-slate-600">People who want easier evenings, better sleep, or clearer mornings, but struggle to consistently follow a full routine.</p>
+      </details>
+      <details class="group border-t border-slate-200 py-4">
+        <summary class="flex cursor-pointer list-none items-center justify-between font-semibold text-slate-900">
+          Is this therapy or medical treatment?
+          <span class="ml-4 text-xl font-bold text-accent-600 transition-transform group-open:rotate-45">+</span>
+        </summary>
+        <p class="mt-2 text-sm text-slate-600">No. This is a guided sleep-support experience on WhatsApp. It doesn't diagnose or treat medical sleep conditions.</p>
+      </details>
+      <details class="group border-t border-slate-200 py-4">
+        <summary class="flex cursor-pointer list-none items-center justify-between font-semibold text-slate-900">
+          What if I miss a night?
+          <span class="ml-4 text-xl font-bold text-accent-600 transition-transform group-open:rotate-45">+</span>
+        </summary>
+        <p class="mt-2 text-sm text-slate-600">Nothing resets. No streaks, no penalties. Just continue the next evening.</p>
+      </details>
+      <details class="group border-t border-slate-200 py-4">
+        <summary class="flex cursor-pointer list-none items-center justify-between font-semibold text-slate-900">
+          How much time does it take?
+          <span class="ml-4 text-xl font-bold text-accent-600 transition-transform group-open:rotate-45">+</span>
+        </summary>
+        <p class="mt-2 text-sm text-slate-600">One short call to start. After that, around a minute or two a day.</p>
+      </details>
+      <details class="group border-t border-slate-200 py-4">
+        <summary class="flex cursor-pointer list-none items-center justify-between font-semibold text-slate-900">
+          What happens after I fill the form?
+          <span class="ml-4 text-xl font-bold text-accent-600 transition-transform group-open:rotate-45">+</span>
+        </summary>
+        <p class="mt-2 text-sm text-slate-600">You'll see the program fee and any invite discount before your onboarding call gets booked. That way you know exactly what you're committing to before you talk to anyone.</p>
+      </details>
+      <details class="group border-t border-slate-200 py-4">
+        <summary class="flex cursor-pointer list-none items-center justify-between font-semibold text-slate-900">
+          What am I actually paying for?
+          <span class="ml-4 text-xl font-bold text-accent-600 transition-transform group-open:rotate-45">+</span>
+        </summary>
+        <p class="mt-2 text-sm text-slate-600">Your first seven days: one onboarding call, a short evening check-in, and one small step each night on WhatsApp. There's no automatic renewal. At the end of the week, we may invite you to continue, but nothing is charged without your agreement.</p>
+      </details>
+      <details class="group border-t border-slate-200 py-4">
+        <summary class="flex cursor-pointer list-none items-center justify-between font-semibold text-slate-900">
+          How will my WhatsApp number be used?
+          <span class="ml-4 text-xl font-bold text-accent-600 transition-transform group-open:rotate-45">+</span>
+        </summary>
+        <p class="mt-2 text-sm text-slate-600">Only for onboarding and your nightly experience. Never shared, never used for anything else.</p>
+      </details>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="py-10 text-center">
+    <p class="text-xs text-slate-400">&copy; 2026. All rights reserved.</p>
+  </footer>
+
+</div>
+
+<script>
+  // ---- CONFIG (single place to edit — no domain baked in elsewhere) ----
+  const CONFIG = {
+    // Google Sheets + Apps Script for lead storage (not Airtable — see
+    // discussion in-thread on why we're using Sheets for this product).
+    // Fill this in once the Apps Script Web App is deployed.
+    SHEET_ENDPOINT: "https://script.google.com/macros/s/AKfycbyFcPzjQt-4mMiGHz7aMHyuk8hTa4wjEWoY5ZcZ1WeLGte0pLMFehIMCXxdNj1kLHA/exec", // e.g. "https://script.google.com/macros/s/XXXXX/exec"
+    PAYWALL_PATH: "pay.html" // relative — works under any domain/subpath
+  };
+
+  const params = new URLSearchParams(window.location.search);
+  const invite = params.get('invite');
+  if (invite) sessionStorage.setItem('invite_code', invite);
+
+  // Attribution capture — dropped from an earlier build pass, re-added here.
+  // Captured once on landing (this is the entry page) and stored so both
+  // this page's submit and pay.html's confirm can attach the same context.
+  if (!sessionStorage.getItem('attr_captured')) {
+    sessionStorage.setItem('utm_source', params.get('utm_source') || '');
+    sessionStorage.setItem('utm_medium', params.get('utm_medium') || '');
+    sessionStorage.setItem('utm_campaign', params.get('utm_campaign') || '');
+    sessionStorage.setItem('referrer', document.referrer || '');
+    sessionStorage.setItem('device', /Mobi/i.test(navigator.userAgent) ? 'mobile' : 'desktop');
+    sessionStorage.setItem('landing_page', window.location.pathname);
+    sessionStorage.setItem('attr_captured', 'true');
+  }
+
+  function getAttribution(){
+    return {
+      utm_source: sessionStorage.getItem('utm_source') || '',
+      utm_medium: sessionStorage.getItem('utm_medium') || '',
+      utm_campaign: sessionStorage.getItem('utm_campaign') || '',
+      referrer: sessionStorage.getItem('referrer') || '',
+      device: sessionStorage.getItem('device') || '',
+      landing_page: sessionStorage.getItem('landing_page') || ''
+    };
+  }
+
+  // Explicit JS scroll for in-page anchor links instead of relying only on
+  // native hash navigation + CSS scroll-smooth. Some mobile webviews
+  // (in-app browsers, older Safari) don't reliably jump on click, especially
+  // when the Tailwind CDN build is still settling layout right after paint.
+  document.querySelectorAll('a[href^="#"]').forEach(link=>{
+    link.addEventListener('click', (e)=>{
+      const targetId = link.getAttribute('href').slice(1);
+      const targetEl = document.getElementById(targetId);
+      if(!targetEl) return; // let the browser handle anything unexpected
+      e.preventDefault();
+      targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+
+  // "None of these" clears other screening checkboxes, and vice versa
+  const gateBoxes = document.querySelectorAll('.gate');
+  const noneBox = document.getElementById('q-screen-none');
+  gateBoxes.forEach(box=>{
+    box.addEventListener('change', ()=>{
+      if(box.checked){ noneBox.checked = false; }
+    });
+  });
+  noneBox.addEventListener('change', ()=>{
+    if(noneBox.checked){
+      gateBoxes.forEach(box=>{ box.checked = false; });
+    }
+  });
+
+  const form = document.getElementById('signup-form');
+  const submitBtn = document.getElementById('submit-btn');
+
+  // ---- Validation helpers ----
+  // novalidate is set on the form deliberately (we render our own error
+  // copy/styling instead of the browser's native bubbles), which means
+  // nothing stops a bad submit unless we check it ourselves here.
+  function setError(fieldEl, errEl, hasError){
+    errEl.classList.toggle('hidden', !hasError);
+    fieldEl.classList.toggle('border-rose-400', hasError);
+    fieldEl.classList.toggle('ring', hasError);
+    fieldEl.classList.toggle('ring-rose-100', hasError);
+  }
+
+  function digitsOnly(str){ return str.replace(/\D/g, ''); }
+
+  function validateForm(){
+    let firstInvalid = null;
+    let ok = true;
+
+    // Name
+    const nameEl = document.getElementById('q-name');
+    const nameValid = nameEl.value.trim().length > 0;
+    setError(nameEl, document.getElementById('err-name'), !nameValid);
+    if(!nameValid){ ok = false; firstInvalid = firstInvalid || nameEl; }
+
+    // Goal (single-select)
+    const goalChecked = !!form.querySelector('input[name=goal]:checked');
+    const goalGroup = document.getElementById('q-goal');
+    document.getElementById('err-goal').classList.toggle('hidden', goalChecked);
+    if(!goalChecked){ ok = false; firstInvalid = firstInvalid || goalGroup; }
+
+    // Routine
+    const routineEl = document.getElementById('q-routine');
+    const routineValid = routineEl.value.trim().length > 0;
+    setError(routineEl, document.getElementById('err-routine'), !routineValid);
+    if(!routineValid){ ok = false; firstInvalid = firstInvalid || routineEl; }
+
+    // Screening group — require at least one option picked (including "None of these")
+    const screenChecked = Array.from(document.querySelectorAll('#q-screen input[name=screen]')).some(b=>b.checked);
+    const screenGroup = document.getElementById('q-screen');
+    document.getElementById('err-screen').classList.toggle('hidden', screenChecked);
+    if(!screenChecked){ ok = false; firstInvalid = firstInvalid || screenGroup; }
+
+    // WhatsApp number — exactly 10 digits after stripping non-digits
+    const waEl = document.getElementById('q-whatsapp');
+    const waDigits = digitsOnly(waEl.value);
+    const waValid = waDigits.length === 10;
+    if(waDigits !== waEl.value) waEl.value = waDigits; // strip spaces/dashes/etc as typed
+    setError(document.getElementById('wa-wrap'), document.getElementById('err-whatsapp'), !waValid);
+    if(!waValid){ ok = false; firstInvalid = firstInvalid || waEl; }
+
+    if(firstInvalid){
+      firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      if(typeof firstInvalid.focus === 'function') firstInvalid.focus();
+    }
+
+    return ok;
+  }
+
+  // Silent check (no error messages, no scrolling) — just whether everything
+  // required is currently filled in, used to enable/disable Continue live.
+  let turnstileToken = '';
+  function onTurnstileSuccess(token){
+    turnstileToken = token;
+    refreshSubmitState();
+  }
+  function onTurnstileExpired(){
+    turnstileToken = '';
+    refreshSubmitState();
+  }
+
+  function isFormComplete(){
+    const nameOk = document.getElementById('q-name').value.trim().length > 0;
+    const goalOk = !!form.querySelector('input[name=goal]:checked');
+    const routineOk = document.getElementById('q-routine').value.trim().length > 0;
+    const screenOk = Array.from(document.querySelectorAll('#q-screen input[name=screen]')).some(b=>b.checked);
+    const waOk = digitsOnly(document.getElementById('q-whatsapp').value).length === 10;
+    return nameOk && goalOk && routineOk && screenOk && waOk && !!turnstileToken;
+  }
+
+  function refreshSubmitState(){
+    submitBtn.disabled = !isFormComplete();
+  }
+
+  // Clear individual field errors as soon as the person fixes them,
+  // rather than waiting for the next submit attempt.
+  document.getElementById('q-name').addEventListener('input', e=>{
+    if(e.target.value.trim().length > 0) setError(e.target, document.getElementById('err-name'), false);
+    refreshSubmitState();
+  });
+  document.getElementById('q-routine').addEventListener('input', e=>{
+    if(e.target.value.trim().length > 0) setError(e.target, document.getElementById('err-routine'), false);
+    refreshSubmitState();
+  });
+  document.getElementById('q-whatsapp').addEventListener('input', e=>{
+    e.target.value = digitsOnly(e.target.value).slice(0,10);
+    if(e.target.value.length === 10) setError(document.getElementById('wa-wrap'), document.getElementById('err-whatsapp'), false);
+    refreshSubmitState();
+  });
+  form.querySelectorAll('input[name=goal]').forEach(r=>{
+    r.addEventListener('change', ()=>{
+      document.getElementById('err-goal').classList.add('hidden');
+      refreshSubmitState();
+    });
+  });
+  form.querySelectorAll('#q-screen input[name=screen]').forEach(c=>{
+    c.addEventListener('change', ()=>{
+      document.getElementById('err-screen').classList.add('hidden');
+      refreshSubmitState();
+    });
+  });
+
+  // Set correct initial state on load (covers browser autofill on refresh).
+  refreshSubmitState();
+
+  form.addEventListener('submit', async (e)=>{
+    e.preventDefault();
+
+    if(!validateForm()) return;
+
+    const gated = Array.from(gateBoxes).some(b=>b.checked);
+    if(gated){
+      form.classList.add('hidden');
+      document.getElementById('decline-message').classList.remove('hidden');
+      submitLead({
+        event: 'decline',
+        declined: true,
+        timestamp: new Date().toISOString(),
+        cf_turnstile_token: turnstileToken,
+        ...getAttribution()
+      });
+      return;
+    }
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'One sec…';
+
+    const data = {
+      event: 'signup',
+      cf_turnstile_token: turnstileToken,
+      name: document.getElementById('q-name').value.trim(),
+      goal: (form.querySelector('input[name=goal]:checked') || {}).value || '',
+      routine: document.getElementById('q-routine').value.trim(),
+      whatsapp: '+91' + document.getElementById('q-whatsapp').value.trim(),
+      invite: sessionStorage.getItem('invite_code') || '',
+      declined: false,
+      timestamp: new Date().toISOString(),
+      ...getAttribution()
+    };
+
+    sessionStorage.setItem('lead_name', data.name);
+    sessionStorage.setItem('lead_whatsapp', data.whatsapp);
+    await submitLead(data);
+    window.location.href = CONFIG.PAYWALL_PATH;
+  });
+
+  async function submitLead(data){
+    if(!CONFIG.SHEET_ENDPOINT){
+      console.warn('SHEET_ENDPOINT not set yet — lead not persisted:', data);
+      return;
+    }
+    try{
+      await fetch(CONFIG.SHEET_ENDPOINT, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: {'Content-Type':'text/plain'},
+        body: JSON.stringify(data)
+      });
+    }catch(err){
+      console.error('Lead submit failed', err);
+    }
+  }
+</script>
+
+</body>
+</html>

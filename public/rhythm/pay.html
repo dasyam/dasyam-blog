@@ -1,0 +1,163 @@
+<!-- Build: V0.2.2 (landing page + payment flow) -->
+<!-- Weeks 1-2 operational cohort: confirm-only, due today is always ₹0.
+     Week 3+ paid traffic (₹199 via Dodo) is explicitly NOT wired here yet —
+     see CONFIG and the confirm handler below for where that plugs in. -->
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Confirm your spot</title>
+<meta name="description" content="Confirm your spot to get started.">
+<meta name="theme-color" content="#db8b57">
+<meta name="color-scheme" content="light">
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          accent: {
+            50:'#fdf3ea', 100:'#fbeadd', 200:'#f3d3b3', 300:'#e8b587',
+            500:'#db8b57', 600:'#db8b57', 700:'#93521f'
+          }
+        }
+      }
+    }
+  }
+</script>
+</head>
+<body class="bg-white text-slate-800 antialiased">
+
+<div class="mx-auto max-w-[540px] px-6">
+
+  <section class="pb-14 pt-12">
+    <div class="mb-4 inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-accent-700">
+      <span class="h-2 w-2 rotate-[-45deg] rounded-[50%_50%_50%_0] bg-accent-600"></span>Private invite
+    </div>
+
+    <h1 id="greeting" class="mb-2 text-3xl font-extrabold leading-tight tracking-tight text-slate-900 sm:text-4xl">
+      Hey there 👋
+    </h1>
+    <p class="mb-6 text-lg text-slate-700">You're almost in. Here's what this covers.</p>
+
+    <!-- What they submitted, so they can confirm it's correct before paying. -->
+    <div class="mb-6 flex items-center justify-between rounded-2xl border border-slate-200 bg-accent-50/40 p-4">
+      <div>
+        <p id="summary-name" class="font-semibold text-slate-900">&nbsp;</p>
+        <p id="summary-whatsapp" class="text-sm text-slate-600">&nbsp;</p>
+      </div>
+      <a href="index.html#form" class="shrink-0 text-sm font-semibold text-accent-700 underline underline-offset-2">Edit</a>
+    </div>
+
+    <!-- Price breakdown card. Real price always renders here, regardless of
+         cohort — only the discount line and due-today amount change. -->
+    <div class="mb-6 rounded-2xl border border-slate-200 p-5 sm:p-6">
+      <div class="flex items-center justify-between py-2 text-sm">
+        <span class="text-slate-600">Standard price</span>
+        <span class="text-slate-600">₹1,499</span>
+      </div>
+      <div id="discount-row" class="flex items-center justify-between py-2 text-sm">
+        <span class="text-slate-600">Private invite</span>
+        <span class="text-slate-600">−₹1,499</span>
+      </div>
+      <div class="mt-2 flex items-center justify-between border-t border-slate-200 pt-4">
+        <span class="text-base font-semibold text-slate-900">Due today</span>
+        <span id="due-today" class="text-2xl font-extrabold text-accent-700">₹0</span>
+      </div>
+    </div>
+
+    <button id="confirm-btn" type="button"
+      class="flex w-full items-center justify-center rounded-2xl bg-accent-600 px-6 py-4 text-base font-bold text-white shadow hover:bg-accent-700 transition-colors disabled:cursor-not-allowed disabled:opacity-60">
+      Confirm my spot →
+    </button>
+
+    <p class="mt-4 text-xs text-slate-500">
+      Covers your first 7 days: onboarding call, evening check-ins, and one small step each night.
+      No auto-renewal. Nothing further is charged without your agreement.
+    </p>
+  </section>
+
+  <footer class="py-10 text-center">
+    <p class="text-xs text-slate-400">&copy; 2026. All rights reserved.</p>
+  </footer>
+
+</div>
+
+<script>
+  // ---- CONFIG ----
+  const CONFIG = {
+    SHEET_ENDPOINT: "https://script.google.com/macros/s/AKfycbyFcPzjQt-4mMiGHz7aMHyuk8hTa4wjEWoY5ZcZ1WeLGte0pLMFehIMCXxdNj1kLHA/exec", // same Apps Script endpoint as index.html
+    SUCCESS_PATH: "success.html" // relative — next build step, not live yet
+  };
+
+  const name = sessionStorage.getItem('lead_name');
+  const whatsapp = sessionStorage.getItem('lead_whatsapp');
+
+  if (name) {
+    document.getElementById('greeting').textContent = `Hey ${name} 👋`;
+    document.getElementById('summary-name').textContent = name;
+  } else {
+    document.getElementById('summary-name').textContent = 'Name not found';
+  }
+
+  if (whatsapp) {
+    document.getElementById('summary-whatsapp').textContent = whatsapp;
+  } else {
+    document.getElementById('summary-whatsapp').textContent = 'Number not found, go back and re-check';
+  }
+
+  // Weeks 1-2 operational cohort: every invite is a 100% discount, due today
+  // is always ₹0. There is no branching logic here yet because Week 3+
+  // paid traffic (real ₹199 via Dodo) isn't live — when it is, this page
+  // needs a cohort-stage check that swaps the discount row, due-today
+  // amount, and the confirm handler below for a real Dodo checkout call.
+  const confirmBtn = document.getElementById('confirm-btn');
+
+  confirmBtn.addEventListener('click', async ()=>{
+    confirmBtn.disabled = true;
+    confirmBtn.textContent = 'Confirming…';
+
+    const data = {
+      event: 'payment_confirmed',
+      name: name || '',
+      whatsapp: whatsapp || '',
+      invite: sessionStorage.getItem('invite_code') || '',
+      amount_due: 0,
+      discount_type: 'private_invite_100',
+      payment_confirmed: true,
+      timestamp: new Date().toISOString(),
+      utm_source: sessionStorage.getItem('utm_source') || '',
+      utm_medium: sessionStorage.getItem('utm_medium') || '',
+      utm_campaign: sessionStorage.getItem('utm_campaign') || '',
+      referrer: sessionStorage.getItem('referrer') || '',
+      device: sessionStorage.getItem('device') || '',
+      landing_page: sessionStorage.getItem('landing_page') || ''
+    };
+
+    sessionStorage.setItem('payment_confirmed', 'true');
+    await submitLead(data);
+    window.location.href = CONFIG.SUCCESS_PATH;
+  });
+
+  async function submitLead(data){
+    if(!CONFIG.SHEET_ENDPOINT){
+      console.warn('SHEET_ENDPOINT not set yet — confirmation not persisted:', data);
+      return;
+    }
+    try{
+      await fetch(CONFIG.SHEET_ENDPOINT, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: {'Content-Type':'text/plain'},
+        body: JSON.stringify(data)
+      });
+    }catch(err){
+      console.error('Confirmation submit failed', err);
+    }
+  }
+</script>
+
+</body>
+</html>

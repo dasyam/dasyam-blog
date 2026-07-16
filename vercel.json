@@ -1,0 +1,6 @@
+{
+  "rewrites": [
+    { "source": "/rhythm", "destination": "/rhythm/index.html" },
+    { "source": "/rhythm/", "destination": "/rhythm/index.html" }
+  ]
+}

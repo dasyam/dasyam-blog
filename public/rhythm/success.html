@@ -1,0 +1,59 @@
+<!-- Build: V0.2.2 (landing page + payment flow) -->
+<!-- Deliberately short: only job is to close the loop on "did that actually
+     work" and point to WhatsApp as the next place to look. Full entitlement
+     detail already lives on the paywall screen (just seen) and WA Template 1
+     (about to arrive), so this doesn't repeat either. -->
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>You're in</title>
+<meta name="description" content="You're in. Check WhatsApp to set up your onboarding call.">
+<meta name="theme-color" content="#db8b57">
+<meta name="color-scheme" content="light">
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          accent: {
+            50:'#fdf3ea', 100:'#fbeadd', 200:'#f3d3b3', 300:'#e8b587',
+            500:'#db8b57', 600:'#db8b57', 700:'#93521f'
+          }
+        }
+      }
+    }
+  }
+</script>
+</head>
+<body class="bg-white text-slate-800 antialiased">
+
+<div class="mx-auto flex min-h-screen max-w-[540px] flex-col justify-center px-6">
+
+  <section class="py-14 text-center">
+    <div class="mb-6 inline-flex h-16 w-16 items-center justify-center rounded-full bg-accent-50 text-3xl">
+      🎉
+    </div>
+    <h1 id="heading" class="mb-3 text-3xl font-extrabold leading-tight tracking-tight text-slate-900 sm:text-4xl">
+      You're in
+    </h1>
+    <p class="mb-2 text-lg text-slate-700">
+      We'll message you on WhatsApp to set up your onboarding call.
+    </p>
+    <p class="text-slate-500">Nothing else to do right now.</p>
+  </section>
+
+</div>
+
+<script>
+  const name = sessionStorage.getItem('lead_name');
+  if (name) {
+    document.getElementById('heading').textContent = `You're in, ${name}`;
+  }
+</script>
+
+</body>
+</html>
