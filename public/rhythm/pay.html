@@ -48,7 +48,8 @@
         <p id="summary-name" class="font-semibold text-slate-900">&nbsp;</p>
         <p id="summary-whatsapp" class="text-sm text-slate-600">&nbsp;</p>
       </div>
-      <a href="index.html#form" class="shrink-0 text-sm font-semibold text-accent-700 underline underline-offset-2">Edit</a>
+      <!-- MIGRATION DEPENDENCY: hardcoded to /rhythm subpath. If this ever moves to a dedicated domain root, update to "/index.html#form" -->
+      <a href="/rhythm/index.html#form" class="shrink-0 text-sm font-semibold text-accent-700 underline underline-offset-2">Edit</a>
     </div>
 
     <!-- Price breakdown card. Real price always renders here, regardless of
@@ -89,7 +90,7 @@
   // ---- CONFIG ----
   const CONFIG = {
     SHEET_ENDPOINT: "https://script.google.com/macros/s/AKfycbyFcPzjQt-4mMiGHz7aMHyuk8hTa4wjEWoY5ZcZ1WeLGte0pLMFehIMCXxdNj1kLHA/exec", // same Apps Script endpoint as index.html
-    SUCCESS_PATH: "success.html" // relative — next build step, not live yet
+    SUCCESS_PATH: "/rhythm/success.html" // MIGRATION DEPENDENCY: hardcoded to /rhythm subpath. If this ever moves to a dedicated domain root, update to "/success.html"
   };
 
   const name = sessionStorage.getItem('lead_name');

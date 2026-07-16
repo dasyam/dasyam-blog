@@ -311,7 +311,7 @@
     // discussion in-thread on why we're using Sheets for this product).
     // Fill this in once the Apps Script Web App is deployed.
     SHEET_ENDPOINT: "https://script.google.com/macros/s/AKfycbyFcPzjQt-4mMiGHz7aMHyuk8hTa4wjEWoY5ZcZ1WeLGte0pLMFehIMCXxdNj1kLHA/exec", // e.g. "https://script.google.com/macros/s/XXXXX/exec"
-    PAYWALL_PATH: "pay.html" // relative — works under any domain/subpath
+    PAYWALL_PATH: "/rhythm/pay.html" // MIGRATION DEPENDENCY: hardcoded to /rhythm subpath. If this ever moves to a dedicated domain root, update to "/pay.html"
   };
 
   const params = new URLSearchParams(window.location.search);
