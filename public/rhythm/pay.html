@@ -33,12 +33,27 @@
     }
   }
 </script>
-<!-- === Lazy-load Analytics: GA4 + Clarity ===
-     Deferred until first user interaction (or idle, whichever comes first)
-     so it never competes with the initial paint. Same pattern used on
-     pcosclarity.com. IDs are Rhythm-specific (GA4 property + Clarity
-     project created 2026-07-16) — do not reuse pcosclarity's IDs here. -->
+<!-- === Analytics: GA4 + Clarity (queued, then lazy-loaded) ===
+     dataLayer/gtag and the Clarity queue stub are defined synchronously
+     here (cheap — no network call), so any gtag()/clarity() call made
+     anywhere on the page — even before the scripts below finish loading —
+     gets queued and processed once they do, instead of silently dropping.
+     Only the actual network fetch of gtag.js / the Clarity tag is deferred
+     until first interaction (or idle), so initial paint stays unblocked.
+     Same lazy-load pattern used on pcosclarity.com. IDs are Rhythm-specific
+     (GA4 property + Clarity project created 2026-07-16) — do not reuse
+     pcosclarity's IDs here. -->
 <script>
+window.dataLayer = window.dataLayer || [];
+function gtag(){ dataLayer.push(arguments); }
+window.gtag = gtag;
+gtag('js', new Date());
+gtag('config', 'G-SXWZ5613QV');
+
+(function(c,l,a,r,i){
+  c[a] = c[a] || function(){ (c[a].q = c[a].q || []).push(arguments); };
+})(window, document, "clarity", "script", "xnay3et4bz");
+
 (function lazyAnalytics(){
   let loaded = false;
   function loadAnalytics() {
@@ -49,17 +64,10 @@
     ga.async = true;
     ga.src = 'https://www.googletagmanager.com/gtag/js?id=G-SXWZ5613QV';
     document.head.appendChild(ga);
-    ga.onload = () => {
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){ dataLayer.push(arguments); }
-      window.gtag = gtag;
-      gtag('js', new Date());
-      gtag('config', 'G-SXWZ5613QV');
-    };
 
     const cl = document.createElement('script');
-    cl.defer = true;
-    cl.innerHTML = '(function(c,l,a,r,i,t,y){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);})(window, document, "clarity", "script", "xnay3et4bz");';
+    cl.async = true;
+    cl.src = 'https://www.clarity.ms/tag/xnay3et4bz';
     document.head.appendChild(cl);
   }
   const start = () => { loadAnalytics(); remove(); };
@@ -160,6 +168,7 @@
   const confirmBtn = document.getElementById('confirm-btn');
 
   confirmBtn.addEventListener('click', async ()=>{
+    gtag('event', 'paywall_confirm_click');
     confirmBtn.disabled = true;
     confirmBtn.textContent = 'Confirming…';
 

@@ -34,12 +34,27 @@
     }
   }
 </script>
-<!-- === Lazy-load Analytics: GA4 + Clarity ===
-     Deferred until first user interaction (or idle, whichever comes first)
-     so it never competes with the initial paint. Same pattern used on
-     pcosclarity.com. IDs are Rhythm-specific (GA4 property + Clarity
-     project created 2026-07-16) — do not reuse pcosclarity's IDs here. -->
+<!-- === Analytics: GA4 + Clarity (queued, then lazy-loaded) ===
+     dataLayer/gtag and the Clarity queue stub are defined synchronously
+     here (cheap — no network call), so any gtag()/clarity() call made
+     anywhere on the page — even before the scripts below finish loading —
+     gets queued and processed once they do, instead of silently dropping.
+     Only the actual network fetch of gtag.js / the Clarity tag is deferred
+     until first interaction (or idle), so initial paint stays unblocked.
+     Same lazy-load pattern used on pcosclarity.com. IDs are Rhythm-specific
+     (GA4 property + Clarity project created 2026-07-16) — do not reuse
+     pcosclarity's IDs here. -->
 <script>
+window.dataLayer = window.dataLayer || [];
+function gtag(){ dataLayer.push(arguments); }
+window.gtag = gtag;
+gtag('js', new Date());
+gtag('config', 'G-SXWZ5613QV');
+
+(function(c,l,a,r,i){
+  c[a] = c[a] || function(){ (c[a].q = c[a].q || []).push(arguments); };
+})(window, document, "clarity", "script", "xnay3et4bz");
+
 (function lazyAnalytics(){
   let loaded = false;
   function loadAnalytics() {
@@ -50,17 +65,10 @@
     ga.async = true;
     ga.src = 'https://www.googletagmanager.com/gtag/js?id=G-SXWZ5613QV';
     document.head.appendChild(ga);
-    ga.onload = () => {
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){ dataLayer.push(arguments); }
-      window.gtag = gtag;
-      gtag('js', new Date());
-      gtag('config', 'G-SXWZ5613QV');
-    };
 
     const cl = document.createElement('script');
-    cl.defer = true;
-    cl.innerHTML = '(function(c,l,a,r,i,t,y){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);})(window, document, "clarity", "script", "xnay3et4bz");';
+    cl.async = true;
+    cl.src = 'https://www.clarity.ms/tag/xnay3et4bz';
     document.head.appendChild(cl);
   }
   const start = () => { loadAnalytics(); remove(); };
@@ -104,7 +112,7 @@
       Better nights.<br><span class="text-accent-700">Clearer mornings.</span>
     </h1>
     <p class="mb-8 text-lg text-slate-700">One small step for tonight, sent straight to WhatsApp. Nothing to plan, no sleep diary to maintain.</p>
-    <a href="#form" class="flex w-full items-center justify-center rounded-2xl bg-accent-600 px-6 py-4 text-base font-bold text-white shadow">Get started</a>
+    <a href="#form" data-cta="hero" class="cta-get-started flex w-full items-center justify-center rounded-2xl bg-accent-600 px-6 py-4 text-base font-bold text-white shadow">Get started</a>
   </section>
 
   <!-- PROBLEM MIRROR -->
@@ -180,7 +188,7 @@
     <h2 class="mb-3 text-2xl font-bold text-slate-900">Why we're starting small</h2>
     <p class="mb-3 text-slate-600">This is currently open to a small number of people.</p>
     <p class="mb-8 text-slate-600">That means every participant gets a real onboarding conversation and a person overseeing the experience from the start.</p>
-    <a href="#form" class="flex w-full items-center justify-center rounded-2xl bg-accent-600 px-6 py-4 text-base font-bold text-white shadow">Get started</a>
+    <a href="#form" data-cta="why_now" class="cta-get-started flex w-full items-center justify-center rounded-2xl bg-accent-600 px-6 py-4 text-base font-bold text-white shadow">Get started</a>
   </section>
 
   <!-- FORM -->
@@ -370,6 +378,15 @@
   const invite = params.get('invite');
   if (invite) sessionStorage.setItem('invite_code', invite);
 
+  // Analytics: get_started_click — both live "Get started" CTAs (hero,
+  // why-now). Nav CTA is inside the still-commented-out header, not live,
+  // so intentionally not wired here.
+  document.querySelectorAll('.cta-get-started').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      gtag('event', 'get_started_click', { cta_location: btn.dataset.cta });
+    });
+  });
+
   // Attribution capture — dropped from an earlier build pass, re-added here.
   // Captured once on landing (this is the entry page) and stored so both
   // this page's submit and pay.html's confirm can attach the same context.
@@ -543,6 +560,7 @@
 
     const gated = Array.from(gateBoxes).some(b=>b.checked);
     if(gated){
+      gtag('event', 'decline_submit');
       document.getElementById('form-intro').classList.add('hidden');
       form.classList.add('hidden');
       const declineMsg = document.getElementById('decline-message');
@@ -572,6 +590,7 @@
 
     submitBtn.disabled = true;
     submitBtn.textContent = 'One sec…';
+    gtag('event', 'signup_submit');
 
     const data = {
       event: 'signup',
