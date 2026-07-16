@@ -45,7 +45,7 @@
           <span class="h-2 w-2 rounded-full bg-white"></span>
         </span>
       </a>
-      <a href="#form" class="rounded-xl bg-accent-600 px-3 py-2 text-sm font-semibold text-white hover:bg-accent-700">Get started</a>
+      <a href="#form" class="rounded-xl bg-accent-600 px-3 py-2 text-sm font-semibold text-white">Get started</a>
     </div>
   </header>
 -->
@@ -61,7 +61,7 @@
       Better nights.<br><span class="text-accent-700">Clearer mornings.</span>
     </h1>
     <p class="mb-8 text-lg text-slate-700">One small step for tonight, sent straight to WhatsApp. Nothing to plan, no sleep diary to maintain.</p>
-    <a href="#form" class="flex w-full items-center justify-center rounded-2xl bg-accent-600 px-6 py-4 text-base font-bold text-white shadow hover:bg-accent-700 transition-colors">Get started</a>
+    <a href="#form" class="flex w-full items-center justify-center rounded-2xl bg-accent-600 px-6 py-4 text-base font-bold text-white shadow">Get started</a>
   </section>
 
   <!-- PROBLEM MIRROR -->
@@ -137,11 +137,11 @@
     <h2 class="mb-3 text-2xl font-bold text-slate-900">Why we're starting small</h2>
     <p class="mb-3 text-slate-600">This is currently open to a small number of people.</p>
     <p class="mb-8 text-slate-600">That means every participant gets a real onboarding conversation and a person overseeing the experience from the start.</p>
-    <a href="#form" class="flex w-full items-center justify-center rounded-2xl bg-accent-600 px-6 py-4 text-base font-bold text-white shadow hover:bg-accent-700 transition-colors">Get started</a>
+    <a href="#form" class="flex w-full items-center justify-center rounded-2xl bg-accent-600 px-6 py-4 text-base font-bold text-white shadow">Get started</a>
   </section>
 
   <!-- FORM -->
-  <section id="form" class="border-b border-slate-200 py-14">
+  <section id="form" class="scroll-mt-20 border-b border-slate-200 py-14">
     <div class="mb-2 inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-accent-700">
       <span class="h-2 w-2 rotate-[-45deg] rounded-[50%_50%_50%_0] bg-accent-600"></span>Two minutes
     </div>
@@ -226,13 +226,16 @@
         data-error-callback="onTurnstileExpired"></div>
       <p id="err-turnstile" class="mt-1.5 hidden text-xs font-medium text-rose-600">Please complete the verification above before continuing.</p>
 
-      <!-- No `disabled` attribute: disabled buttons can't receive click/submit
-           events at all, which was silently blocking validateForm() from ever
-           running and showing the person which field needs fixing. The
-           "looks inactive until ready" cue is now handled purely via the
-           opacity-40 class in refreshSubmitState(), not via native disabled. -->
+      <!-- No `disabled` attribute, and no dimming based on completeness either:
+           disabled buttons can't receive click/submit events at all, which was
+           silently blocking validateForm() from ever running. The button now
+           always looks fully active — clicking it when something's missing
+           immediately shows exactly which field via validateForm() below,
+           rather than leaving the person guessing why a dimmed button won't
+           respond. Field-level blur validation (see input/blur listeners
+           above) also catches most mistakes before Continue is even reached. -->
       <button type="submit" id="submit-btn"
-        class="mt-2 flex w-full items-center justify-center rounded-2xl bg-accent-600 px-5 py-4 text-base font-bold text-white shadow hover:bg-accent-700 transition-opacity opacity-40">
+        class="mt-2 flex w-full items-center justify-center rounded-2xl bg-accent-600 px-5 py-4 text-base font-bold text-white shadow hover:bg-accent-700">
         Continue
       </button>
     </form>
@@ -449,56 +452,46 @@
   function onTurnstileSuccess(token){
     turnstileToken = token;
     document.getElementById('err-turnstile').classList.add('hidden');
-    refreshSubmitState();
   }
   function onTurnstileExpired(){
     turnstileToken = '';
-    refreshSubmitState();
-  }
-
-  function isFormComplete(){
-    const nameOk = document.getElementById('q-name').value.trim().length > 0;
-    const goalOk = !!form.querySelector('input[name=goal]:checked');
-    const routineOk = document.getElementById('q-routine').value.trim().length > 0;
-    const screenOk = Array.from(document.querySelectorAll('#q-screen input[name=screen]')).some(b=>b.checked);
-    const waOk = digitsOnly(document.getElementById('q-whatsapp').value).length === 10;
-    return nameOk && goalOk && routineOk && screenOk && waOk && !!turnstileToken;
-  }
-
-  function refreshSubmitState(){
-    submitBtn.classList.toggle('opacity-40', !isFormComplete());
   }
 
   // Clear individual field errors as soon as the person fixes them,
-  // rather than waiting for the next submit attempt.
+  // rather than waiting for the next submit attempt. Also validate on blur
+  // (leaving the field) so mistakes — a 9-digit WhatsApp number, a name
+  // left blank — surface immediately, before the person ever reaches
+  // Continue, rather than only being caught in one batch at submit time.
   document.getElementById('q-name').addEventListener('input', e=>{
     if(e.target.value.trim().length > 0) setError(e.target, document.getElementById('err-name'), false);
-    refreshSubmitState();
+  });
+  document.getElementById('q-name').addEventListener('blur', e=>{
+    setError(e.target, document.getElementById('err-name'), e.target.value.trim().length === 0);
   });
   document.getElementById('q-routine').addEventListener('input', e=>{
     if(e.target.value.trim().length > 0) setError(e.target, document.getElementById('err-routine'), false);
-    refreshSubmitState();
+  });
+  document.getElementById('q-routine').addEventListener('blur', e=>{
+    setError(e.target, document.getElementById('err-routine'), e.target.value.trim().length === 0);
   });
   document.getElementById('q-whatsapp').addEventListener('input', e=>{
     e.target.value = digitsOnly(e.target.value).slice(0,10);
     if(e.target.value.length === 10) setError(document.getElementById('wa-wrap'), document.getElementById('err-whatsapp'), false);
-    refreshSubmitState();
+  });
+  document.getElementById('q-whatsapp').addEventListener('blur', e=>{
+    const waDigits = digitsOnly(e.target.value);
+    setError(document.getElementById('wa-wrap'), document.getElementById('err-whatsapp'), waDigits.length > 0 && waDigits.length !== 10);
   });
   form.querySelectorAll('input[name=goal]').forEach(r=>{
     r.addEventListener('change', ()=>{
       document.getElementById('err-goal').classList.add('hidden');
-      refreshSubmitState();
     });
   });
   form.querySelectorAll('#q-screen input[name=screen]').forEach(c=>{
     c.addEventListener('change', ()=>{
       document.getElementById('err-screen').classList.add('hidden');
-      refreshSubmitState();
     });
   });
-
-  // Set correct initial state on load (covers browser autofill on refresh).
-  refreshSubmitState();
 
   form.addEventListener('submit', async (e)=>{
     e.preventDefault();
