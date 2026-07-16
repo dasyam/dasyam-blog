@@ -224,9 +224,15 @@
       <div class="cf-turnstile" data-sitekey="0x4AAAAAAD2avPUx-CP9vn9q"
         data-callback="onTurnstileSuccess" data-expired-callback="onTurnstileExpired"
         data-error-callback="onTurnstileExpired"></div>
+      <p id="err-turnstile" class="mt-1.5 hidden text-xs font-medium text-rose-600">Please complete the verification above before continuing.</p>
 
-      <button type="submit" id="submit-btn" disabled
-        class="mt-2 flex w-full items-center justify-center rounded-2xl bg-accent-600 px-5 py-4 text-base font-bold text-white shadow hover:bg-accent-700 disabled:cursor-not-allowed disabled:opacity-40">
+      <!-- No `disabled` attribute: disabled buttons can't receive click/submit
+           events at all, which was silently blocking validateForm() from ever
+           running and showing the person which field needs fixing. The
+           "looks inactive until ready" cue is now handled purely via the
+           opacity-40 class in refreshSubmitState(), not via native disabled. -->
+      <button type="submit" id="submit-btn"
+        class="mt-2 flex w-full items-center justify-center rounded-2xl bg-accent-600 px-5 py-4 text-base font-bold text-white shadow hover:bg-accent-700 transition-opacity opacity-40">
         Continue
       </button>
     </form>
@@ -422,6 +428,13 @@
     setError(document.getElementById('wa-wrap'), document.getElementById('err-whatsapp'), !waValid);
     if(!waValid){ ok = false; firstInvalid = firstInvalid || waEl; }
 
+    // Turnstile — previously only silently gated the submit button, with no
+    // visible reason shown when it was the sole thing blocking submission.
+    const turnstileEl = document.querySelector('.cf-turnstile');
+    const turnstileValid = !!turnstileToken;
+    document.getElementById('err-turnstile').classList.toggle('hidden', turnstileValid);
+    if(!turnstileValid){ ok = false; firstInvalid = firstInvalid || turnstileEl; }
+
     if(firstInvalid){
       firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
       if(typeof firstInvalid.focus === 'function') firstInvalid.focus();
@@ -435,6 +448,7 @@
   let turnstileToken = '';
   function onTurnstileSuccess(token){
     turnstileToken = token;
+    document.getElementById('err-turnstile').classList.add('hidden');
     refreshSubmitState();
   }
   function onTurnstileExpired(){
@@ -452,7 +466,7 @@
   }
 
   function refreshSubmitState(){
-    submitBtn.disabled = !isFormComplete();
+    submitBtn.classList.toggle('opacity-40', !isFormComplete());
   }
 
   // Clear individual field errors as soon as the person fixes them,
@@ -494,10 +508,23 @@
     const gated = Array.from(gateBoxes).some(b=>b.checked);
     if(gated){
       form.classList.add('hidden');
-      document.getElementById('decline-message').classList.remove('hidden');
+      const declineMsg = document.getElementById('decline-message');
+      declineMsg.classList.remove('hidden');
+      // Without this, the message renders in place of the now-hidden form —
+      // if the person was scrolled down near WhatsApp/Continue when gated,
+      // the message can land above their current viewport and leave them
+      // looking at a blank gap with no indication anything happened.
+      declineMsg.setAttribute('tabindex', '-1');
+      declineMsg.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      declineMsg.focus({ preventScroll: true });
       submitLead({
         event: 'decline',
         declined: true,
+        name: document.getElementById('q-name').value.trim(),
+        goal: (form.querySelector('input[name=goal]:checked') || {}).value || '',
+        routine: document.getElementById('q-routine').value.trim(),
+        whatsapp: '+91' + document.getElementById('q-whatsapp').value.trim(),
+        invite: sessionStorage.getItem('invite_code') || '',
         timestamp: new Date().toISOString(),
         cf_turnstile_token: turnstileToken,
         ...getAttribution()
