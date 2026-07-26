@@ -1,5 +1,9 @@
 {
   "rewrites": [
+    { "source": "/", "has": [{ "type": "host", "value": "rhythm.srinivasdasyam.com" }], "destination": "/rhythm/index.html" },
+    { "source": "/rhythm", "has": [{ "type": "host", "value": "rhythm.srinivasdasyam.com" }], "destination": "/rhythm/index.html" },
+    { "source": "/rhythm/:path*", "has": [{ "type": "host", "value": "rhythm.srinivasdasyam.com" }], "destination": "/rhythm/:path*" },
+    { "source": "/:path*", "has": [{ "type": "host", "value": "rhythm.srinivasdasyam.com" }], "destination": "/rhythm/:path*" },
     { "source": "/rhythm", "destination": "/rhythm/index.html" },
     { "source": "/rhythm/", "destination": "/rhythm/index.html" }
   ]
