@@ -1,0 +1,81 @@
+<!-- Build: V0.2.5 (static page, matches index.html/pay.html shell) -->
+<!-- Added for Razorpay KYC business-website check. Content reflects the
+     actual product: 7-day paid entry point, no auto-renewal. Placeholder
+     contact email marked below, fill in before publishing. -->
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Refund Policy</title>
+<meta name="description" content="Refund policy for the program.">
+<meta name="theme-color" content="#db8b57">
+<meta name="color-scheme" content="light">
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          accent: {
+            50:'#fdf3ea', 100:'#fbeadd', 200:'#f3d3b3', 300:'#e8b587',
+            500:'#db8b57', 600:'#db8b57', 700:'#93521f'
+          }
+        }
+      }
+    }
+  }
+</script>
+</head>
+<body class="bg-white text-slate-800 antialiased">
+
+<div class="mx-auto max-w-[540px] px-6">
+
+  <section class="border-b border-slate-200 pb-14 pt-12">
+    <div class="mb-4 inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-accent-700">
+      <span class="h-2 w-2 rotate-[-45deg] rounded-[50%_50%_50%_0] bg-accent-600"></span>Policies
+    </div>
+    <h1 class="mb-4 text-3xl font-extrabold leading-tight tracking-tight text-slate-900 sm:text-4xl">
+      Refund Policy
+    </h1>
+    <p class="text-sm text-slate-500">Last updated 26 July 2026.</p>
+  </section>
+
+  <section class="border-b border-slate-200 py-10">
+    <h2 class="mb-3 text-lg font-bold text-slate-900">What you're paying for</h2>
+    <p class="text-slate-600">The program fee covers your first seven days: one onboarding call, a short evening check-in, and one small step each night on WhatsApp. There is no auto-renewal, and nothing further is charged without your agreement.</p>
+  </section>
+
+  <section class="border-b border-slate-200 py-10">
+    <h2 class="mb-3 text-lg font-bold text-slate-900">Refund window</h2>
+    <p class="mb-3 text-slate-600">If you change your mind before your onboarding call has taken place, you can request a full refund, no questions asked.</p>
+    <p class="mb-3 text-slate-600">Once the onboarding call has happened and your program has started, the fee covers time and a personal decision made for that week, so it isn't refundable from that point.</p>
+    <p class="text-slate-600">If, during the screening questions, it turns out the program isn't a fit for you and you were charged anyway, you'll get a full refund automatically.</p>
+  </section>
+
+  <section class="border-b border-slate-200 py-10">
+    <h2 class="mb-3 text-lg font-bold text-slate-900">How to request one</h2>
+    <p class="text-slate-600">Message us on WhatsApp, the same number the program messages you from, and let us know you'd like a refund. We'll process eligible refunds within 5 to 7 business days to your original payment method.</p>
+  </section>
+
+  <section class="py-10">
+    <h2 class="mb-3 text-lg font-bold text-slate-900">Questions</h2>
+    <!-- PLACEHOLDER: confirm real contact email before publishing -->
+    <p class="text-slate-600">Reach out at <span class="font-semibold text-slate-900">dahasyam@gmail.com</span> and we'll get back to you.</p>
+  </section>
+
+  <!-- MIGRATION DEPENDENCY: footer links hardcoded to /rhythm subpath. If this ever moves to a dedicated domain root, update both to "/terms.html" and "/refund.html" -->
+  <footer class="py-10 text-center">
+    <p class="text-xs text-slate-400">&copy; 2026. All rights reserved.</p>
+    <p class="mt-2 text-xs text-slate-400">
+      <a href="/rhythm/terms.html" class="underline underline-offset-2 hover:text-slate-500">Terms</a>
+      <span class="mx-2">·</span>
+      <a href="/rhythm/refund.html" class="underline underline-offset-2 hover:text-slate-500">Refund Policy</a>
+    </p>
+  </footer>
+
+</div>
+
+</body>
+</html>

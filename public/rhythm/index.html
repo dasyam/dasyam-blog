@@ -360,10 +360,15 @@ gtag('config', 'G-SXWZ5613QV');
   </section>
 
   <!-- FOOTER -->
+  <!-- MIGRATION DEPENDENCY: footer links hardcoded to /rhythm subpath. If this ever moves to a dedicated domain root, update both to "/terms.html" and "/refund.html" -->
   <footer class="py-10 text-center">
     <p class="text-xs text-slate-400">&copy; 2026. All rights reserved.</p>
+    <p class="mt-2 text-xs text-slate-400">
+      <a href="/rhythm/terms.html" class="underline underline-offset-2 hover:text-slate-500">Terms</a>
+      <span class="mx-2">·</span>
+      <a href="/rhythm/refund.html" class="underline underline-offset-2 hover:text-slate-500">Refund Policy</a>
+    </p>
   </footer>
-
 </div>
 
 <script>
