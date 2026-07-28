@@ -90,8 +90,16 @@
 
       const options = {
         // TEST-mode Key ID only. Never put the Key Secret here — this file
-        // is public and served as-is.
-        key: 'rzp_test_TIsDrAGrhfNjy7',
+        // is public and served as-is. Hardcoding the Key ID is correct and
+        // expected — it's not sensitive, only the Key Secret is (that one
+        // stays server-side only, in api/create-order.js and
+        // api/verify-payment.js as a Vercel env var).
+        //
+        // MIGRATION DEPENDENCY: this is a rzp_test_ key. When cutting over
+        // to live payments in pay.html, this must become the rzp_live_
+        // Key ID from the activated Razorpay account. This test file itself
+        // won't ship to production, but the same swap applies wherever this
+        // checkout logic gets copied into pay.html.
         amount: order.amount,
         currency: order.currency,
         name: 'Rhythm (test)',
