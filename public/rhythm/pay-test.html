@@ -1,0 +1,157 @@
+<!-- TEST MODE ONLY. Not linked from index.html, pay.html, or any nav.
+     Only reachable by typing the URL directly:
+     rhythm.srinivasdasyam.com/rhythm/pay-test.html
+     Purpose: validate the Razorpay checkout → verify loop in isolation
+     before it ever touches pay.html. Uses Razorpay TEST mode key only. -->
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Razorpay test — internal only</title>
+<meta name="robots" content="noindex, nofollow">
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          accent: {
+            50:'#fdf3ea', 100:'#fbeadd', 200:'#f3d3b3', 300:'#e8b587',
+            500:'#db8b57', 600:'#db8b57', 700:'#93521f'
+          }
+        }
+      }
+    }
+  }
+</script>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+</head>
+<body class="bg-white text-slate-800 antialiased">
+
+<div class="mx-auto max-w-[540px] px-6 py-14">
+
+  <div class="mb-6 inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-accent-700">
+    <span class="h-2 w-2 rotate-[-45deg] rounded-[50%_50%_50%_0] bg-accent-600"></span>
+    Internal test — not a real checkout
+  </div>
+
+  <h1 class="mb-6 text-2xl font-extrabold text-slate-900">Razorpay test checkout</h1>
+
+  <div class="mb-6 rounded-2xl border border-slate-200 p-5">
+    <div class="flex items-center justify-between py-2 text-sm">
+      <span class="text-slate-600">Test amount</span>
+      <span class="text-slate-600">₹1.00</span>
+    </div>
+  </div>
+
+  <button id="pay-btn" type="button"
+    class="flex w-full items-center justify-center rounded-2xl bg-accent-600 px-6 py-4 text-base font-bold text-white shadow hover:bg-accent-700 transition-colors disabled:cursor-not-allowed disabled:opacity-60">
+    Pay ₹1 (test mode) →
+  </button>
+
+  <div id="result" class="mt-6 rounded-2xl border border-slate-200 p-4 text-sm text-slate-600">
+    No attempt yet.
+  </div>
+
+</div>
+
+<script>
+  const payBtn = document.getElementById('pay-btn');
+  const resultBox = document.getElementById('result');
+
+  function setResult(text, tone) {
+    resultBox.textContent = text;
+    resultBox.className = 'mt-6 rounded-2xl border p-4 text-sm ' +
+      (tone === 'ok' ? 'border-green-300 bg-green-50 text-green-800'
+        : tone === 'fail' ? 'border-red-300 bg-red-50 text-red-800'
+        : 'border-slate-200 text-slate-600');
+  }
+
+  payBtn.addEventListener('click', async () => {
+    payBtn.disabled = true;
+    payBtn.textContent = 'Creating order…';
+    setResult('Creating order…');
+
+    try {
+      const orderRes = await fetch('/api/create-order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ amount: 100, currency: 'INR', receipt: 'internal_test' })
+      });
+
+      if (!orderRes.ok) {
+        const err = await orderRes.json().catch(() => ({}));
+        throw new Error(err.error || 'Order creation failed');
+      }
+
+      const order = await orderRes.json();
+
+      const options = {
+        // TEST-mode Key ID only. Never put the Key Secret here — this file
+        // is public and served as-is.
+        key: 'rzp_test_TIr5aLMX4JTJX3',
+        amount: order.amount,
+        currency: order.currency,
+        name: 'Rhythm (test)',
+        description: 'Internal Razorpay integration test',
+        order_id: order.order_id,
+        handler: async function (response) {
+          setResult('Verifying signature…');
+          try {
+            const verifyRes = await fetch('/api/verify-payment', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature
+              })
+            });
+            const verifyData = await verifyRes.json();
+            if (verifyRes.ok && verifyData.status === 'verified') {
+              setResult(
+                'Verified. payment_id: ' + verifyData.payment_id + ', order_id: ' + verifyData.order_id,
+                'ok'
+              );
+            } else {
+              setResult('Verification failed: ' + (verifyData.reason || 'unknown'), 'fail');
+            }
+          } catch (err) {
+            setResult('Verify request errored: ' + err.message, 'fail');
+          } finally {
+            payBtn.disabled = false;
+            payBtn.textContent = 'Pay ₹1 (test mode) →';
+          }
+        },
+        modal: {
+          ondismiss: function () {
+            setResult('Checkout dismissed before payment.', 'fail');
+            payBtn.disabled = false;
+            payBtn.textContent = 'Pay ₹1 (test mode) →';
+          }
+        },
+        theme: { color: '#db8b57' }
+      };
+
+      const rzp = new Razorpay(options);
+
+      rzp.on('payment.failed', function (response) {
+        setResult('Payment failed: ' + (response.error && response.error.description || 'unknown'), 'fail');
+        payBtn.disabled = false;
+        payBtn.textContent = 'Pay ₹1 (test mode) →';
+      });
+
+      rzp.open();
+      payBtn.textContent = 'Waiting on checkout…';
+    } catch (err) {
+      setResult('Error: ' + err.message, 'fail');
+      payBtn.disabled = false;
+      payBtn.textContent = 'Pay ₹1 (test mode) →';
+    }
+  });
+</script>
+
+</body>
+</html>
