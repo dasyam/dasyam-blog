@@ -29,6 +29,12 @@ export default function middleware(request: Request) {
     return; // not our host — let normal routing (blog, etc.) proceed
   }
 
+  // API routes are Vercel Functions, not static files under public/rhythm/.
+  // Never rewrite these — they need to hit /api/* directly on every host.
+  if (url.pathname.startsWith('/api/')) {
+    return;
+  }
+
   // Legacy hardcoded paths already start with /rhythm/ — this is what
   // pay.html's SUCCESS_PATH and index.html's PAYWALL_PATH currently point
   // at (see the three MIGRATION DEPENDENCY comments). Pass these through
