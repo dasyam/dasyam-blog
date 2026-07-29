@@ -1,0 +1,286 @@
+<!-- ============================================================
+     HELD DRAFT — DO NOT PUSH TO main YET.
+     This is a full replacement for public/rhythm/pay.html's confirm
+     handler, swapping the ₹0 discount-code confirm for a real Razorpay
+     checkout. Built and validated logic (create-order / verify-payment /
+     webhook all proven in pay-test.html), but per Operating Principle 1
+     this stays out of the live cohort's path until you deliberately decide
+     to cut over — see the OPEN DECISIONS block below before that happens.
+     ============================================================ -->
+
+<!-- OPEN DECISIONS — resolve before pushing this live:
+
+  1. PRICE MISMATCH: this draft currently keeps the existing ₹1,499
+     standard price shown on pay.html. But the original CONFIG comment in
+     the live pay.html referenced ₹199 for Week 3 paid traffic — that
+     number never got reconciled anywhere in project files. Confirm the
+     real Week 3 price before cutover; this draft does NOT decide that for
+     you, it just keeps the number currently live so nothing silently
+     changes.
+
+  2. COHORT STAGE: this draft assumes payment is no longer ₹0/discount-code
+     — i.e. Week 3 paid traffic has actually started. If some participants
+     should still get the discount-code ₹0 path (e.g. mid-cohort
+     continuations) while new signups pay live, that branching logic isn't
+     built here yet — this draft is single-path (everyone pays).
+
+  3. Live vs test key: swap `key:` below from rzp_test_ to the real
+     rzp_live_ Key ID at actual cutover — currently left as rzp_test_ in
+     this draft intentionally, so it can't accidentally go live if this
+     file is ever mistakenly pushed as-is.
+
+-->
+
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Confirm your spot</title>
+<meta name="description" content="Confirm your spot to get started.">
+<meta name="theme-color" content="#db8b57">
+<meta name="color-scheme" content="light">
+
+<link rel="preconnect" href="https://www.googletagmanager.com" crossorigin>
+<link rel="dns-prefetch" href="https://www.googletagmanager.com">
+<link rel="preconnect" href="https://www.clarity.ms" crossorigin>
+<link rel="dns-prefetch" href="https://www.clarity.ms">
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          accent: {
+            50:'#fdf3ea', 100:'#fbeadd', 200:'#f3d3b3', 300:'#e8b587',
+            500:'#db8b57', 600:'#db8b57', 700:'#93521f'
+          }
+        }
+      }
+    }
+  }
+</script>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+<script>
+window.dataLayer = window.dataLayer || [];
+function gtag(){ dataLayer.push(arguments); }
+window.gtag = gtag;
+gtag('js', new Date());
+gtag('config', 'G-SXWZ5613QV');
+
+(function(c,l,a,r,i){
+  c[a] = c[a] || function(){ (c[a].q = c[a].q || []).push(arguments); };
+})(window, document, "clarity", "script", "xnay3et4bz");
+
+(function lazyAnalytics(){
+  let loaded = false;
+  function loadAnalytics() {
+    if (loaded) return;
+    loaded = true;
+    const ga = document.createElement('script');
+    ga.async = true;
+    ga.src = 'https://www.googletagmanager.com/gtag/js?id=G-SXWZ5613QV';
+    document.head.appendChild(ga);
+    const cl = document.createElement('script');
+    cl.async = true;
+    cl.src = 'https://www.clarity.ms/tag/xnay3et4bz';
+    document.head.appendChild(cl);
+  }
+  const start = () => { loadAnalytics(); remove(); };
+  function remove(){
+    ['scroll','mousedown','touchstart','keydown'].forEach(ev => window.removeEventListener(ev, start, { passive: true }));
+  }
+  ['scroll','mousedown','touchstart','keydown'].forEach(ev => window.addEventListener(ev, start, { passive: true }));
+  (window.requestIdleCallback || function(f){ setTimeout(f,1500); })(loadAnalytics);
+})();
+</script>
+</head>
+<body class="bg-white text-slate-800 antialiased">
+
+<div class="mx-auto max-w-[540px] px-6">
+
+  <section class="pb-14 pt-12">
+    <div class="mb-4 inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-accent-700">
+      <span class="h-2 w-2 rotate-[-45deg] rounded-[50%_50%_50%_0] bg-accent-600"></span>Private invite
+    </div>
+
+    <h1 id="greeting" class="mb-2 text-3xl font-extrabold leading-tight tracking-tight text-slate-900 sm:text-4xl">
+      Hey there 👋
+    </h1>
+    <p class="mb-6 text-lg text-slate-700">You're almost in. Here's what this covers.</p>
+
+    <div class="mb-6 flex items-center justify-between rounded-2xl border border-slate-200 bg-accent-50/40 p-4">
+      <div>
+        <p id="summary-name" class="font-semibold text-slate-900">&nbsp;</p>
+        <p id="summary-whatsapp" class="text-sm text-slate-600">&nbsp;</p>
+      </div>
+      <a href="/rhythm/index.html#form" class="shrink-0 text-sm font-semibold text-accent-700 underline underline-offset-2">Edit</a>
+    </div>
+
+    <div class="mb-6 rounded-2xl border border-slate-200 p-5 sm:p-6">
+      <div class="flex items-center justify-between py-2 text-sm">
+        <span class="text-slate-600">Price</span>
+        <!-- OPEN DECISION #1 — confirm real number before cutover -->
+        <span class="text-2xl font-extrabold text-accent-700" id="due-today">₹1,499</span>
+      </div>
+    </div>
+
+    <button id="confirm-btn" type="button"
+      class="flex w-full items-center justify-center rounded-2xl bg-accent-600 px-6 py-4 text-base font-bold text-white shadow hover:bg-accent-700 transition-colors disabled:cursor-not-allowed disabled:opacity-60">
+      Pay & confirm my spot →
+    </button>
+
+    <p id="error-msg" class="mt-3 hidden text-sm text-red-600"></p>
+
+    <p class="mt-4 text-xs text-slate-500">
+      Covers your first 7 days: onboarding call, evening check-ins, and one small step each night.
+      No auto-renewal. Nothing further is charged without your agreement.
+    </p>
+  </section>
+
+  <footer class="py-10 text-center">
+    <p class="text-xs text-slate-400">&copy; 2026. All rights reserved.</p>
+    <p class="mt-2 text-xs text-slate-400">
+      <a href="/rhythm/terms.html" class="underline underline-offset-2 hover:text-slate-500">Terms</a>
+      <span class="mx-2">·</span>
+      <a href="/rhythm/refund.html" class="underline underline-offset-2 hover:text-slate-500">Refund Policy</a>
+    </p>
+  </footer>
+
+</div>
+
+<script>
+  const CONFIG = {
+    SUCCESS_PATH: "/rhythm/success.html",
+    AMOUNT_PAISE: 149900 // OPEN DECISION #1 — ₹1,499 kept as-is, confirm before cutover
+  };
+
+  const name = sessionStorage.getItem('lead_name');
+  const whatsapp = sessionStorage.getItem('lead_whatsapp');
+
+  if (name) {
+    document.getElementById('greeting').textContent = `Hey ${name} 👋`;
+    document.getElementById('summary-name').textContent = name;
+  } else {
+    document.getElementById('summary-name').textContent = 'Name not found';
+  }
+
+  if (whatsapp) {
+    document.getElementById('summary-whatsapp').textContent = whatsapp;
+  } else {
+    document.getElementById('summary-whatsapp').textContent = 'Number not found, go back and re-check';
+  }
+
+  const confirmBtn = document.getElementById('confirm-btn');
+  const errorMsg = document.getElementById('error-msg');
+
+  function showError(text) {
+    errorMsg.textContent = text;
+    errorMsg.classList.remove('hidden');
+  }
+
+  confirmBtn.addEventListener('click', async () => {
+    gtag('event', 'paywall_confirm_click');
+    confirmBtn.disabled = true;
+    confirmBtn.textContent = 'Preparing checkout…';
+    errorMsg.classList.add('hidden');
+
+    try {
+      const orderRes = await fetch('/api/create-order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          amount: CONFIG.AMOUNT_PAISE,
+          currency: 'INR',
+          receipt: `rhythm_${Date.now()}`,
+          notes: {
+            name: name || '',
+            whatsapp: whatsapp || '',
+            invite: sessionStorage.getItem('invite_code') || '',
+            utm_source: sessionStorage.getItem('utm_source') || '',
+            utm_medium: sessionStorage.getItem('utm_medium') || '',
+            utm_campaign: sessionStorage.getItem('utm_campaign') || '',
+            referrer: sessionStorage.getItem('referrer') || '',
+            device: sessionStorage.getItem('device') || '',
+            landing_page: sessionStorage.getItem('landing_page') || ''
+          }
+        })
+      });
+
+      if (!orderRes.ok) throw new Error('Could not start checkout. Please try again.');
+      const order = await orderRes.json();
+
+      const options = {
+        // OPEN DECISION #3 — swap to rzp_live_ Key ID at actual cutover.
+        // Left as test key intentionally in this held draft.
+        key: 'rzp_test_TIr5aLMX4JTJX3',
+        amount: order.amount,
+        currency: order.currency,
+        name: 'Rhythm',
+        description: 'First 7 days',
+        order_id: order.order_id,
+        prefill: {
+          name: name || '',
+          contact: whatsapp || ''
+        },
+        handler: async function (response) {
+          confirmBtn.textContent = 'Confirming…';
+          try {
+            const verifyRes = await fetch('/api/verify-payment', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature
+              })
+            });
+            const verifyData = await verifyRes.json();
+
+            if (verifyRes.ok && verifyData.status === 'verified') {
+              // Webhook (api/razorpay-webhook.js) is the actual source of
+              // truth that forwards to the Sheet + triggers notifyNewMember
+              // — this client-side confirm is just for immediate redirect,
+              // not relied on for record-keeping.
+              sessionStorage.setItem('payment_confirmed', 'true');
+              window.location.href = CONFIG.SUCCESS_PATH;
+            } else {
+              showError('Payment could not be verified. If money was deducted, message us on WhatsApp and we will sort it out.');
+              confirmBtn.disabled = false;
+              confirmBtn.textContent = 'Pay & confirm my spot →';
+            }
+          } catch (err) {
+            showError('Something went wrong confirming your payment. Please message us on WhatsApp.');
+            confirmBtn.disabled = false;
+            confirmBtn.textContent = 'Pay & confirm my spot →';
+          }
+        },
+        modal: {
+          ondismiss: function () {
+            confirmBtn.disabled = false;
+            confirmBtn.textContent = 'Pay & confirm my spot →';
+          }
+        },
+        theme: { color: '#db8b57' }
+      };
+
+      const rzp = new Razorpay(options);
+      rzp.on('payment.failed', function (response) {
+        showError('Payment failed. Please try again or use a different method.');
+        confirmBtn.disabled = false;
+        confirmBtn.textContent = 'Pay & confirm my spot →';
+      });
+      rzp.open();
+      confirmBtn.textContent = 'Waiting on checkout…';
+    } catch (err) {
+      showError(err.message || 'Something went wrong. Please try again.');
+      confirmBtn.disabled = false;
+      confirmBtn.textContent = 'Pay & confirm my spot →';
+    }
+  });
+</script>
+
+</body>
+</html>

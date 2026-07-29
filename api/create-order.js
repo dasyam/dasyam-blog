@@ -20,7 +20,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { amount, currency = 'INR', receipt } = req.body || {};
+    const { amount, currency = 'INR', receipt, notes } = req.body || {};
 
     if (!amount || typeof amount !== 'number' || amount < 100) {
       return res.status(400).json({ error: 'Amount must be an integer >= 100 (paise)' });
@@ -28,17 +28,26 @@ export default async function handler(req, res) {
 
     const auth = Buffer.from(`${keyId}:${keySecret}`).toString('base64');
 
+    // `notes` rides through Razorpay unchanged and comes back attached to
+    // the payment object in the webhook payload — this is how the webhook
+    // (which has no other context) knows which participant this was.
+    // Keep it optional so pay-test.html (no participant identity) still works.
+    const orderPayload = {
+      amount,
+      currency,
+      receipt: receipt || `receipt_${Date.now()}`
+    };
+    if (notes && typeof notes === 'object') {
+      orderPayload.notes = notes;
+    }
+
     const rzpResponse = await fetch('https://api.razorpay.com/v1/orders', {
       method: 'POST',
       headers: {
         Authorization: `Basic ${auth}`,
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({
-        amount,
-        currency,
-        receipt: receipt || `test_receipt_${Date.now()}`
-      })
+      body: JSON.stringify(orderPayload)
     });
 
     if (!rzpResponse.ok) {
