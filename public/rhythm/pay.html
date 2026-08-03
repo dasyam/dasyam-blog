@@ -1,5 +1,5 @@
 <!-- ============================================================
-     LIVE — public/rhythm/pay.html
+     LIVE, public/rhythm/pay.html
      Real Razorpay checkout (create-order / verify-payment / webhook),
      founding-cohort pricing, ref-based badge. Cut over from the held
      draft on 2026-08-03; see Engine/CURRENT_STATE history for the prior
@@ -84,7 +84,7 @@ gtag('config', 'G-SXWZ5613QV');
     <h1 id="greeting" class="mb-1 text-2xl font-extrabold leading-tight tracking-tight text-slate-900 sm:text-3xl">
       Hey there 👋
     </h1>
-    <p class="mb-3 text-base text-slate-700">You're almost in — here's what your first week includes.</p>
+    <p class="mb-3 text-base text-slate-700">You're almost in. Here's what your first week includes.</p>
 
     <ul class="mb-4 space-y-1 text-sm text-slate-600">
       <li class="flex items-start gap-2"><span class="text-accent-600">✓</span> Onboarding call to personalize your plan</li>
@@ -231,7 +231,7 @@ gtag('config', 'G-SXWZ5613QV');
             if (verifyRes.ok && verifyData.status === 'verified') {
               // Webhook (api/razorpay-webhook.js) is the actual source of
               // truth that forwards to the Sheet + triggers notifyNewMember
-              // — this client-side confirm is just for immediate redirect,
+              // this client-side confirm is just for immediate redirect,
               // not relied on for record-keeping.
               sessionStorage.setItem('payment_confirmed', 'true');
               window.location.href = CONFIG.SUCCESS_PATH;
