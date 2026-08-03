@@ -1,7 +1,11 @@
-<!-- Build: V0.2.5 (landing page + payment flow + analytics) -->
-<!-- Weeks 1-2 operational cohort: confirm-only, due today is always ₹0.
-     Week 3+ paid traffic (₹199 via Dodo) is explicitly NOT wired here yet —
-     see CONFIG and the confirm handler below for where that plugs in. -->
+<!-- ============================================================
+     LIVE — public/rhythm/pay.html
+     Real Razorpay checkout (create-order / verify-payment / webhook),
+     founding-cohort pricing, ref-based badge. Cut over from the held
+     draft on 2026-08-03; see Engine/CURRENT_STATE history for the prior
+     open-decisions record if needed.
+     ============================================================ -->
+
 <!DOCTYPE html>
 <html lang="en" class="scroll-smooth">
 <head>
@@ -12,7 +16,6 @@
 <meta name="theme-color" content="#db8b57">
 <meta name="color-scheme" content="light">
 
-<!-- Preconnects for analytics (still lazy-loaded below) -->
 <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin>
 <link rel="dns-prefetch" href="https://www.googletagmanager.com">
 <link rel="preconnect" href="https://www.clarity.ms" crossorigin>
@@ -33,16 +36,8 @@
     }
   }
 </script>
-<!-- === Analytics: GA4 + Clarity (queued, then lazy-loaded) ===
-     dataLayer/gtag and the Clarity queue stub are defined synchronously
-     here (cheap — no network call), so any gtag()/clarity() call made
-     anywhere on the page — even before the scripts below finish loading —
-     gets queued and processed once they do, instead of silently dropping.
-     Only the actual network fetch of gtag.js / the Clarity tag is deferred
-     until first interaction (or idle), so initial paint stays unblocked.
-     Same lazy-load pattern used on pcosclarity.com. IDs are Rhythm-specific
-     (GA4 property + Clarity project created 2026-07-16) — do not reuse
-     pcosclarity's IDs here. -->
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
 <script>
 window.dataLayer = window.dataLayer || [];
 function gtag(){ dataLayer.push(arguments); }
@@ -59,12 +54,10 @@ gtag('config', 'G-SXWZ5613QV');
   function loadAnalytics() {
     if (loaded) return;
     loaded = true;
-
     const ga = document.createElement('script');
     ga.async = true;
     ga.src = 'https://www.googletagmanager.com/gtag/js?id=G-SXWZ5613QV';
     document.head.appendChild(ga);
-
     const cl = document.createElement('script');
     cl.async = true;
     cl.src = 'https://www.clarity.ms/tag/xnay3et4bz';
@@ -85,7 +78,7 @@ gtag('config', 'G-SXWZ5613QV');
 
   <section class="pb-14 pt-12">
     <div class="mb-4 inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-accent-700">
-      <span class="h-2 w-2 rotate-[-45deg] rounded-[50%_50%_50%_0] bg-accent-600"></span>Private invite
+      <span class="h-2 w-2 rotate-[-45deg] rounded-[50%_50%_50%_0] bg-accent-600"></span><span id="badge-text">Founding cohort</span>
     </div>
 
     <h1 id="greeting" class="mb-2 text-3xl font-extrabold leading-tight tracking-tight text-slate-900 sm:text-4xl">
@@ -93,37 +86,35 @@ gtag('config', 'G-SXWZ5613QV');
     </h1>
     <p class="mb-6 text-lg text-slate-700">You're almost in. Here's what this covers.</p>
 
-    <!-- What they submitted, so they can confirm it's correct before paying. -->
     <div class="mb-6 flex items-center justify-between rounded-2xl border border-slate-200 bg-accent-50/40 p-4">
       <div>
         <p id="summary-name" class="font-semibold text-slate-900">&nbsp;</p>
         <p id="summary-whatsapp" class="text-sm text-slate-600">&nbsp;</p>
       </div>
-      <!-- MIGRATION DEPENDENCY: hardcoded to /rhythm subpath. If this ever moves to a dedicated domain root, update to "/index.html#form" -->
       <a href="/rhythm/index.html#form" class="shrink-0 text-sm font-semibold text-accent-700 underline underline-offset-2">Edit</a>
     </div>
 
-    <!-- Price breakdown card. Real price always renders here, regardless of
-         cohort — only the discount line and due-today amount change. -->
     <div class="mb-6 rounded-2xl border border-slate-200 p-5 sm:p-6">
       <div class="flex items-center justify-between py-2 text-sm">
         <span class="text-slate-600">Standard price</span>
-        <span class="text-slate-600">₹1,499</span>
+        <span class="text-slate-500 line-through">₹1,499</span>
       </div>
-      <div id="discount-row" class="flex items-center justify-between py-2 text-sm">
-        <span class="text-slate-600">Private invite</span>
-        <span class="text-slate-600">−₹1,499</span>
+      <div class="flex items-center justify-between py-2 text-sm">
+        <span class="text-slate-600">Founding cohort offer</span>
+        <span class="font-semibold text-accent-700">−₹1,300</span>
       </div>
-      <div class="mt-2 flex items-center justify-between border-t border-slate-200 pt-4">
-        <span class="text-base font-semibold text-slate-900">Due today</span>
-        <span id="due-today" class="text-2xl font-extrabold text-accent-700">₹0</span>
+      <div class="flex items-center justify-between border-t border-slate-200 py-2 pt-3 text-sm">
+        <span class="font-semibold text-slate-700">Due today</span>
+        <span class="text-2xl font-extrabold text-accent-700" id="due-today">₹199</span>
       </div>
     </div>
 
     <button id="confirm-btn" type="button"
       class="flex w-full items-center justify-center rounded-2xl bg-accent-600 px-6 py-4 text-base font-bold text-white shadow hover:bg-accent-700 transition-colors disabled:cursor-not-allowed disabled:opacity-60">
-      Confirm my spot →
+      Pay & confirm my spot →
     </button>
+
+    <p id="error-msg" class="mt-3 hidden text-sm text-red-600"></p>
 
     <p class="mt-4 text-xs text-slate-500">
       Covers your first 7 days: onboarding call, evening check-ins, and one small step each night.
@@ -131,7 +122,6 @@ gtag('config', 'G-SXWZ5613QV');
     </p>
   </section>
 
-  <!-- MIGRATION DEPENDENCY: footer links hardcoded to /rhythm subpath. If this ever moves to a dedicated domain root, update both to "/terms.html" and "/refund.html" -->
   <footer class="py-10 text-center">
     <p class="text-xs text-slate-400">&copy; 2026. All rights reserved.</p>
     <p class="mt-2 text-xs text-slate-400">
@@ -144,14 +134,17 @@ gtag('config', 'G-SXWZ5613QV');
 </div>
 
 <script>
-  // ---- CONFIG ----
   const CONFIG = {
-    SHEET_ENDPOINT: "https://script.google.com/macros/s/AKfycbyFcPzjQt-4mMiGHz7aMHyuk8hTa4wjEWoY5ZcZ1WeLGte0pLMFehIMCXxdNj1kLHA/exec", // same Apps Script endpoint as index.html
-    SUCCESS_PATH: "/rhythm/success.html" // MIGRATION DEPENDENCY: hardcoded to /rhythm subpath. If this ever moves to a dedicated domain root, update to "/success.html"
+    SUCCESS_PATH: "/rhythm/success.html",
+    AMOUNT_PAISE: 19900 // ₹199 due today (founding cohort price)
   };
 
   const name = sessionStorage.getItem('lead_name');
   const whatsapp = sessionStorage.getItem('lead_whatsapp');
+
+  const ref = sessionStorage.getItem('ref');
+  const badgeText = ref === 'personal' ? 'Private invite' : 'Founding cohort';
+  document.getElementById('badge-text').textContent = badgeText;
 
   if (name) {
     document.getElementById('greeting').textContent = `Hey ${name} 👋`;
@@ -166,56 +159,111 @@ gtag('config', 'G-SXWZ5613QV');
     document.getElementById('summary-whatsapp').textContent = 'Number not found, go back and re-check';
   }
 
-  // Weeks 1-2 operational cohort: every invite is a 100% discount, due today
-  // is always ₹0. There is no branching logic here yet because Week 3+
-  // paid traffic (real ₹199 via Dodo) isn't live — when it is, this page
-  // needs a cohort-stage check that swaps the discount row, due-today
-  // amount, and the confirm handler below for a real Dodo checkout call.
   const confirmBtn = document.getElementById('confirm-btn');
+  const errorMsg = document.getElementById('error-msg');
 
-  confirmBtn.addEventListener('click', async ()=>{
+  function showError(text) {
+    errorMsg.textContent = text;
+    errorMsg.classList.remove('hidden');
+  }
+
+  confirmBtn.addEventListener('click', async () => {
     gtag('event', 'paywall_confirm_click');
     confirmBtn.disabled = true;
-    confirmBtn.textContent = 'Confirming…';
+    confirmBtn.textContent = 'Preparing checkout…';
+    errorMsg.classList.add('hidden');
 
-    const data = {
-      event: 'payment_confirmed',
-      name: name || '',
-      whatsapp: whatsapp || '',
-      invite: sessionStorage.getItem('invite_code') || '',
-      amount_due: 0,
-      discount_type: 'private_invite_100',
-      payment_confirmed: true,
-      timestamp: new Date().toISOString(),
-      utm_source: sessionStorage.getItem('utm_source') || '',
-      utm_medium: sessionStorage.getItem('utm_medium') || '',
-      utm_campaign: sessionStorage.getItem('utm_campaign') || '',
-      referrer: sessionStorage.getItem('referrer') || '',
-      device: sessionStorage.getItem('device') || '',
-      landing_page: sessionStorage.getItem('landing_page') || ''
-    };
-
-    sessionStorage.setItem('payment_confirmed', 'true');
-    await submitLead(data);
-    window.location.href = CONFIG.SUCCESS_PATH;
-  });
-
-  async function submitLead(data){
-    if(!CONFIG.SHEET_ENDPOINT){
-      console.warn('SHEET_ENDPOINT not set yet — confirmation not persisted:', data);
-      return;
-    }
-    try{
-      await fetch(CONFIG.SHEET_ENDPOINT, {
+    try {
+      const orderRes = await fetch('/api/create-order', {
         method: 'POST',
-        mode: 'no-cors',
-        headers: {'Content-Type':'text/plain'},
-        body: JSON.stringify(data)
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          amount: CONFIG.AMOUNT_PAISE,
+          currency: 'INR',
+          receipt: `rhythm_${Date.now()}`,
+          notes: {
+            name: name || '',
+            whatsapp: whatsapp || '',
+            invite: sessionStorage.getItem('invite_code') || '',
+            utm_source: sessionStorage.getItem('utm_source') || '',
+            utm_medium: sessionStorage.getItem('utm_medium') || '',
+            utm_campaign: sessionStorage.getItem('utm_campaign') || '',
+            referrer: sessionStorage.getItem('referrer') || '',
+            device: sessionStorage.getItem('device') || '',
+            landing_page: sessionStorage.getItem('landing_page') || ''
+          }
+        })
       });
-    }catch(err){
-      console.error('Confirmation submit failed', err);
+
+      if (!orderRes.ok) throw new Error('Could not start checkout. Please try again.');
+      const order = await orderRes.json();
+
+      const options = {
+        key: 'rzp_live_TJEwEnoMcVqP0Z',
+        amount: order.amount,
+        currency: order.currency,
+        name: 'Rhythm',
+        description: 'First 7 days',
+        order_id: order.order_id,
+        prefill: {
+          name: name || '',
+          contact: whatsapp || ''
+        },
+        handler: async function (response) {
+          confirmBtn.textContent = 'Confirming…';
+          try {
+            const verifyRes = await fetch('/api/verify-payment', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature
+              })
+            });
+            const verifyData = await verifyRes.json();
+
+            if (verifyRes.ok && verifyData.status === 'verified') {
+              // Webhook (api/razorpay-webhook.js) is the actual source of
+              // truth that forwards to the Sheet + triggers notifyNewMember
+              // — this client-side confirm is just for immediate redirect,
+              // not relied on for record-keeping.
+              sessionStorage.setItem('payment_confirmed', 'true');
+              window.location.href = CONFIG.SUCCESS_PATH;
+            } else {
+              showError('Payment could not be verified. If money was deducted, message us on WhatsApp and we will sort it out.');
+              confirmBtn.disabled = false;
+              confirmBtn.textContent = 'Pay & confirm my spot →';
+            }
+          } catch (err) {
+            showError('Something went wrong confirming your payment. Please message us on WhatsApp.');
+            confirmBtn.disabled = false;
+            confirmBtn.textContent = 'Pay & confirm my spot →';
+          }
+        },
+        modal: {
+          ondismiss: function () {
+            confirmBtn.disabled = false;
+            confirmBtn.textContent = 'Pay & confirm my spot →';
+          }
+        },
+        theme: { color: '#db8b57' }
+      };
+
+      const rzp = new Razorpay(options);
+      rzp.on('payment.failed', function (response) {
+        showError('Payment failed. Please try again or use a different method.');
+        confirmBtn.disabled = false;
+        confirmBtn.textContent = 'Pay & confirm my spot →';
+      });
+      rzp.open();
+      confirmBtn.textContent = 'Waiting on checkout…';
+    } catch (err) {
+      showError(err.message || 'Something went wrong. Please try again.');
+      confirmBtn.disabled = false;
+      confirmBtn.textContent = 'Pay & confirm my spot →';
     }
-  }
+  });
 </script>
 
 </body>

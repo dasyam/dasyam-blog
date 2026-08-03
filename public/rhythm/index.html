@@ -401,6 +401,7 @@ gtag('config', 'G-SXWZ5613QV');
     sessionStorage.setItem('utm_source', params.get('utm_source') || '');
     sessionStorage.setItem('utm_medium', params.get('utm_medium') || '');
     sessionStorage.setItem('utm_campaign', params.get('utm_campaign') || '');
+    sessionStorage.setItem('ref', params.get('ref') || '');
     sessionStorage.setItem('referrer', document.referrer || '');
     sessionStorage.setItem('device', /Mobi/i.test(navigator.userAgent) ? 'mobile' : 'desktop');
     sessionStorage.setItem('landing_page', window.location.pathname);
