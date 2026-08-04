@@ -15,25 +15,11 @@
 <link rel="preconnect" href="https://www.clarity.ms" crossorigin>
 <link rel="dns-prefetch" href="https://www.clarity.ms">
 
-<!-- Tailwind used across the whole page now (previously mixed with hand-rolled
-     CSS, which caused Tailwind's preflight reset to fight our custom h1/h2
-     rules and shrink the headline). One system end to end avoids that. -->
-<script src="https://cdn.tailwindcss.com"></script>
+<!-- Compiled Tailwind CSS (production build, not the CDN Play script).
+     Generated from tailwind.config.js against this file's actual class
+     usage — static, cacheable, no in-browser JIT compilation. -->
+<link rel="stylesheet" href="styles.css">
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
-<script>
-  tailwind.config = {
-    theme: {
-      extend: {
-        colors: {
-          accent: {
-            50:'#fdf3ea', 100:'#fbeadd', 200:'#f3d3b3', 300:'#e8b587',
-            500:'#db8b57', 600:'#db8b57', 700:'#93521f'
-          }
-        }
-      }
-    }
-  }
-</script>
 <!-- === Analytics: GA4 + Clarity (queued, then lazy-loaded) ===
      dataLayer/gtag and the Clarity queue stub are defined synchronously
      here (cheap — no network call), so any gtag()/clarity() call made
