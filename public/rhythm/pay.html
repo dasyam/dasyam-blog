@@ -1,7 +1,8 @@
 <!-- ============================================================
      LIVE, public/rhythm/pay.html
      Real Razorpay checkout (create-order / verify-payment / webhook),
-     founding-cohort pricing, ref-based badge. Cut over from the held
+     early-bird, limited-seats pricing (previously "founding cohort").
+     Cut over from the held
      draft on 2026-08-03; see Engine/CURRENT_STATE history for the prior
      open-decisions record if needed.
      ============================================================ -->
@@ -67,7 +68,7 @@ gtag('config', 'G-SXWZ5613QV');
 
   <section class="pb-14 pt-8">
     <div class="mb-3 inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-accent-700">
-      <span class="h-2 w-2 rotate-[-45deg] rounded-[50%_50%_50%_0] bg-accent-600"></span><span id="badge-text">Founding cohort</span>
+      <span class="h-2 w-2 rotate-[-45deg] rounded-[50%_50%_50%_0] bg-accent-600"></span><span id="badge-text">Private invite</span>
     </div>
 
     <h1 id="greeting" class="mb-1 text-2xl font-extrabold leading-tight tracking-tight text-slate-900 sm:text-3xl">
@@ -89,13 +90,15 @@ gtag('config', 'G-SXWZ5613QV');
       <a href="/rhythm/index.html#form" class="shrink-0 text-sm font-semibold text-accent-700 underline underline-offset-2">Edit</a>
     </div>
 
+    <p class="mb-2 text-sm italic text-slate-500">A few early bird seats left at this price.</p>
+
     <div class="mb-4 rounded-2xl border border-slate-200 p-4">
       <div class="flex items-center justify-between py-1.5 text-sm">
         <span class="text-slate-600">Standard price</span>
         <span class="text-slate-500 line-through">₹1,499</span>
       </div>
       <div class="flex items-center justify-between py-1.5 text-sm">
-        <span class="text-slate-600">Founding cohort offer</span>
+        <span class="text-slate-600">Early bird discount</span>
         <span class="font-semibold text-accent-700">−₹1,300</span>
       </div>
       <div class="flex items-center justify-between border-t border-slate-200 py-1.5 pt-2 text-sm">
@@ -130,14 +133,19 @@ gtag('config', 'G-SXWZ5613QV');
 <script>
   const CONFIG = {
     SUCCESS_PATH: "/rhythm/success.html",
-    AMOUNT_PAISE: 19900 // ₹199 due today (founding cohort price)
+    AMOUNT_PAISE: 19900 // ₹199 due today (early bird price)
   };
 
   const name = sessionStorage.getItem('lead_name');
   const whatsapp = sessionStorage.getItem('lead_whatsapp');
 
   const ref = sessionStorage.getItem('ref');
-  const badgeText = ref === 'personal' ? 'Private invite' : 'Founding cohort';
+  // Badge text is fixed to "Private invite" for everyone for now (previously
+  // branched on ref === 'personal' vs a "Founding cohort" default). The
+  // branch point is left in place, not deleted, since a distinct badge for
+  // traffic outside personal-network marketing is expected once that phase
+  // starts — re-add the ref-based split then rather than rebuilding it.
+  const badgeText = 'Private invite';
   document.getElementById('badge-text').textContent = badgeText;
 
   if (name) {
