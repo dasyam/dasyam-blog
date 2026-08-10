@@ -136,6 +136,14 @@ gtag('config', 'G-SXWZ5613QV');
     AMOUNT_PAISE: 19900 // ₹199 due today (early bird price)
   };
 
+  // One-tap direct link support: ?name=...&whatsapp=... overrides sessionStorage
+  // if present. Normal form -> pay.html flow is untouched when params are absent.
+  const urlParams = new URLSearchParams(window.location.search);
+  const paramName = urlParams.get('name');
+  const paramWhatsapp = urlParams.get('whatsapp');
+  if (paramName) sessionStorage.setItem('lead_name', paramName);
+  if (paramWhatsapp) sessionStorage.setItem('lead_whatsapp', paramWhatsapp);
+
   const name = sessionStorage.getItem('lead_name');
   const whatsapp = sessionStorage.getItem('lead_whatsapp');
 
@@ -167,6 +175,15 @@ gtag('config', 'G-SXWZ5613QV');
   function showError(text) {
     errorMsg.textContent = text;
     errorMsg.classList.remove('hidden');
+  }
+
+  // Guard: if we landed here with no name or whatsapp (bare URL, stripped
+  // params, cleared session), block payment instead of letting it go through
+  // unidentified. Does not affect the normal flow where both are present.
+  if (!name || !whatsapp) {
+    confirmBtn.disabled = true;
+    confirmBtn.textContent = 'Details missing';
+    showError('We could not find your details. Please go back to the form and fill it in, or use the link sent to you.');
   }
 
   confirmBtn.addEventListener('click', async () => {
