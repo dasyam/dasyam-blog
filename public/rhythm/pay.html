@@ -262,6 +262,14 @@ gtag('config', 'G-SXWZ5613QV');
         },
         modal: {
           ondismiss: function () {
+            // Fires when the checkout modal is closed without completing
+            // payment. Distinct signal from never clicking confirm at all,
+            // and distinct from payment.failed below (this is an
+            // abandonment, not a decline).
+            gtag('event', 'payment_dropped', {
+              node: sessionStorage.getItem('utm_source') || '',
+              campaign: sessionStorage.getItem('utm_campaign') || ''
+            });
             confirmBtn.disabled = false;
             confirmBtn.textContent = 'Pay & confirm my spot →';
           }
@@ -271,6 +279,15 @@ gtag('config', 'G-SXWZ5613QV');
 
       const rzp = new Razorpay(options);
       rzp.on('payment.failed', function (response) {
+        // Reached checkout and attempted payment, but it was declined or
+        // errored out, rather than the person closing the modal themselves
+        // (see payment_dropped above). Keeps "tried and failed" separate
+        // from "gave up."
+        gtag('event', 'payment_failed', {
+          node: sessionStorage.getItem('utm_source') || '',
+          campaign: sessionStorage.getItem('utm_campaign') || '',
+          reason: (response && response.error && response.error.description) || ''
+        });
         showError('Payment failed. Please try again or use a different method.');
         confirmBtn.disabled = false;
         confirmBtn.textContent = 'Pay & confirm my spot →';
