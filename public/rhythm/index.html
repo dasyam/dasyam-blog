@@ -92,7 +92,7 @@ gtag('config', 'G-SXWZ5613QV');
   <!-- HERO -->
   <section id="top" class="border-b border-slate-200 pb-14 pt-12">
     <div class="mb-4 inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-accent-700">
-      <span class="h-2 w-2 rotate-[-45deg] rounded-[50%_50%_50%_0] bg-accent-600"></span>Private invite
+      <span class="h-2 w-2 rotate-[-45deg] rounded-[50%_50%_50%_0] bg-accent-600"></span>Limited seats
     </div>
     <h1 class="mb-4 text-4xl font-extrabold leading-tight tracking-tight text-slate-900 sm:text-5xl">
       Better nights.<br><span class="text-accent-700">Clearer mornings.</span>
@@ -140,7 +140,7 @@ gtag('config', 'G-SXWZ5613QV');
         <div class="min-w-[28px] pt-0.5 text-lg font-extrabold text-accent-700">02</div>
         <div>
           <h3 class="mb-1 font-semibold text-slate-900">Have a short call</h3>
-          <p class="text-sm text-slate-600">A 5-minute WhatsApp call to understand where your evenings usually get stuck.</p>
+          <p class="text-sm text-slate-600">A 5-minute WhatsApp call with Srinivas, who runs the program, to understand where your evenings usually get stuck.</p>
         </div>
       </div>
       <div class="flex gap-4 border-t border-slate-200 py-5">
@@ -181,15 +181,14 @@ gtag('config', 'G-SXWZ5613QV');
     </ul>
   </section>
 
-  <!-- WHY STARTING SMALL -->
+  <!-- THE METHOD (was: WHY STARTING SMALL) -->
   <section class="border-b border-slate-200 py-14">
     <div class="mb-4 inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-accent-700">
-      <span class="h-2 w-2 rotate-[-45deg] rounded-[50%_50%_50%_0] bg-accent-600"></span>Why now
+      <span class="h-2 w-2 rotate-[-45deg] rounded-[50%_50%_50%_0] bg-accent-600"></span>The method
     </div>
-    <h2 class="mb-3 text-2xl font-bold text-slate-900">Why we're starting small</h2>
-    <p class="mb-3 text-slate-600">This is currently open to a small number of people.</p>
-    <p class="mb-3 text-slate-600">I'm Srinivas. I built this, and I'll personally take your onboarding call and guide you through the week. That's why I'm keeping it small for now.</p>
-    <p class="mb-8 text-slate-600">Which also means the steps keep getting shaped by what's working for people already in the program.</p>
+    <h2 class="mb-3 text-2xl font-bold text-slate-900">How the steps are chosen</h2>
+    <p class="mb-3 text-slate-600">Not a fixed routine. Each night's step draws on what's already working for people in the program.</p>
+    <p class="mb-8 text-slate-600">Which is also why this stays small. Every step is chosen by hand, not generated.</p>
     <a href="#form" data-cta="why_now" class="cta-get-started flex w-full items-center justify-center rounded-2xl bg-accent-700 px-6 py-4 text-base font-bold text-white shadow hover:bg-accent-800 transition-colors">Get started</a>
   </section>
 
@@ -415,6 +414,11 @@ gtag('config', 'G-SXWZ5613QV');
     sessionStorage.setItem('landing_page', window.location.pathname);
     sessionStorage.setItem('attr_captured', 'true');
   }
+
+  // Hero badge fixed to "Limited seats" for everyone, matching pay.html.
+  // "Private invite" implied a relationship not true for cold (Meta)
+  // traffic; a ref-based split was considered and dropped as unneeded
+  // complexity for a claim that's honestly true either way.
 
   function getAttribution(){
     return {

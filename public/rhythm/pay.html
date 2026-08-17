@@ -147,14 +147,12 @@ gtag('config', 'G-SXWZ5613QV');
   const name = sessionStorage.getItem('lead_name');
   const whatsapp = sessionStorage.getItem('lead_whatsapp');
 
-  const ref = sessionStorage.getItem('ref');
-  // Badge text is fixed to "Private invite" for everyone for now (previously
-  // branched on ref === 'personal' vs a "Founding cohort" default). The
-  // branch point is left in place, not deleted, since a distinct badge for
-  // traffic outside personal-network marketing is expected once that phase
-  // starts — re-add the ref-based split then rather than rebuilding it.
-  const badgeText = 'Private invite';
-  document.getElementById('badge-text').textContent = badgeText;
+  // Badge fixed to "Limited seats" for everyone, node and cold traffic alike.
+  // "Private invite" implied a relationship that isn't true for cold (Meta)
+  // traffic, and a ref-based split added complexity for a claim that didn't
+  // need two versions. "Limited seats" is honestly true either way and
+  // matches the "few early bird seats" line above it.
+  document.getElementById('badge-text').textContent = 'Limited seats';
 
   if (name) {
     document.getElementById('greeting').textContent = `Hey ${name} 👋`;
