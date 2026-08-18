@@ -23,16 +23,24 @@
      pay.html, generated from tailwind.config.js) — static, cacheable,
      no in-browser JIT compilation. -->
 <link rel="stylesheet" href="/rhythm/styles.css">
-<!-- === Analytics: GA4 + Clarity (queued, then lazy-loaded) ===
-     dataLayer/gtag and the Clarity queue stub are defined synchronously
-     here (cheap — no network call), so any gtag()/clarity() call made
-     anywhere on the page — even before the scripts below finish loading —
-     gets queued and processed once they do, instead of silently dropping.
-     Only the actual network fetch of gtag.js / the Clarity tag is deferred
-     until first interaction (or idle), so initial paint stays unblocked.
-     Same lazy-load pattern used on pcosclarity.com. IDs are Rhythm-specific
-     (GA4 property + Clarity project created 2026-07-16) — do not reuse
-     pcosclarity's IDs here. -->
+<!-- === Analytics: GA4 loaded eagerly here, Clarity still lazy ===
+     DELIBERATE DIVERGENCE from index.html and pay.html, which both lazy-load
+     gtag.js on first interaction or ~1.5s idle. That pattern is wrong for
+     this page specifically.
+
+     This is a terminal page. People read three lines, then close the tab or
+     switch to WhatsApp, often inside 1.5s with no scroll, click or keypress.
+     Under the lazy pattern the gtag.js fetch would never start, the queued
+     payment_success event would never send, and the single most important
+     conversion in the funnel would be silently lost. Load-speed optimisation
+     buys nothing on a page nobody stays on.
+
+     Clarity stays lazy: session replay on a static confirmation screen has
+     no value worth blocking paint for.
+
+     IDs are Rhythm-specific (GA4 property + Clarity project created
+     2026-07-16). Do not reuse pcosclarity's IDs here. -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-SXWZ5613QV"></script>
 <script>
 window.dataLayer = window.dataLayer || [];
 function gtag(){ dataLayer.push(arguments); }
@@ -44,28 +52,22 @@ gtag('config', 'G-SXWZ5613QV');
   c[a] = c[a] || function(){ (c[a].q = c[a].q || []).push(arguments); };
 })(window, document, "clarity", "script", "xnay3et4bz");
 
-(function lazyAnalytics(){
+(function lazyClarity(){
   let loaded = false;
-  function loadAnalytics() {
+  function loadClarity() {
     if (loaded) return;
     loaded = true;
-
-    const ga = document.createElement('script');
-    ga.async = true;
-    ga.src = 'https://www.googletagmanager.com/gtag/js?id=G-SXWZ5613QV';
-    document.head.appendChild(ga);
-
     const cl = document.createElement('script');
     cl.async = true;
     cl.src = 'https://www.clarity.ms/tag/xnay3et4bz';
     document.head.appendChild(cl);
   }
-  const start = () => { loadAnalytics(); remove(); };
+  const start = () => { loadClarity(); remove(); };
   function remove(){
     ['scroll','mousedown','touchstart','keydown'].forEach(ev => window.removeEventListener(ev, start, { passive: true }));
   }
   ['scroll','mousedown','touchstart','keydown'].forEach(ev => window.addEventListener(ev, start, { passive: true }));
-  (window.requestIdleCallback || function(f){ setTimeout(f,1500); })(loadAnalytics);
+  (window.requestIdleCallback || function(f){ setTimeout(f,1500); })(loadClarity);
 })();
 </script>
 </head>
@@ -92,10 +94,28 @@ gtag('config', 'G-SXWZ5613QV');
   const name = sessionStorage.getItem('lead_name');
   if (name) {
     document.getElementById('heading').textContent = `You're in, ${name}`;
-    // Only counted as a real completion if this page was reached through
-    // the actual flow (lead_name set by index.html/pay.html) — guards
-    // against a stray direct visit to this URL inflating the count.
-    gtag('event', 'signup_complete');
+  }
+
+  // Conversion event is gated on payment_confirmed, NOT on lead_name.
+  // lead_name is written back on index.html at form submit, before payment
+  // happens at all, so it proves someone filled the form and nothing more.
+  // payment_confirmed is written in pay.html only after /api/verify-payment
+  // returns verified, so it is the only client-side flag that actually
+  // means money moved.
+  //
+  // This is analytics only. The Sheet record and the WhatsApp trigger both
+  // come from api/razorpay-webhook.js server-side, independent of whether
+  // this browser ever renders this page. Nothing here is source of truth.
+  if (sessionStorage.getItem('payment_confirmed') === 'true') {
+    gtag('event', 'payment_success', {
+      value: 199,
+      currency: 'INR',
+      node: sessionStorage.getItem('utm_source') || '',
+      campaign: sessionStorage.getItem('utm_campaign') || ''
+    });
+    // Consume the flag so a refresh of this page does not refire and
+    // double-count the same payment.
+    sessionStorage.removeItem('payment_confirmed');
   }
 </script>
 
