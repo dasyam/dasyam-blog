@@ -14,6 +14,8 @@
 <link rel="dns-prefetch" href="https://www.googletagmanager.com">
 <link rel="preconnect" href="https://www.clarity.ms" crossorigin>
 <link rel="dns-prefetch" href="https://www.clarity.ms">
+<link rel="preconnect" href="https://connect.facebook.net" crossorigin>
+<link rel="dns-prefetch" href="https://connect.facebook.net">
 
 <!-- Compiled Tailwind CSS (production build, not the CDN Play script).
      Generated from tailwind.config.js against this file's actual class
@@ -40,6 +42,37 @@ gtag('config', 'G-SXWZ5613QV');
 (function(c,l,a,r,i){
   c[a] = c[a] || function(){ (c[a].q = c[a].q || []).push(arguments); };
 })(window, document, "clarity", "script", "xnay3et4bz");
+
+/* === Meta Pixel: loaded EAGERLY, unlike GA4 and Clarity below ===
+   DELIBERATE DIVERGENCE from the lazy pattern used for the other two tags
+   on this page. Nothing about that pattern changes; only the pixel opts out.
+
+   Reason: this page is the ad destination. PageView is the event Meta uses
+   to register that a click actually landed, and it is the base every
+   audience and every attribution window is built on. Under the lazy
+   pattern the fetch waits for a scroll, tap, key or idle callback, so a
+   visitor who bounces before that never registers as a landing at all.
+   On warm node traffic that loss is tolerable. On paid cold traffic the
+   fast bounce is exactly the population being measured, and undercounting
+   it distorts the one number the spend is buying.
+
+   Cost is one async script fetch. It does not block parsing or paint. GA4
+   and Clarity stay lazy because neither is paying for the click.
+
+   Pixel ID must stay identical on index.html, pay.html and success.html.
+   Changing it in one place only produces a funnel that reports partially. */
+const META_PIXEL_ID = '1843917183640946'; // Rhythm pixel, Business Manager, 2026-08-19
+
+!function(f,b,e,v,n,t,s)
+{if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+n.queue=[];t=b.createElement(e);t.async=!0;
+t.src=v;s=b.getElementsByTagName(e)[0];
+s.parentNode.insertBefore(t,s)}(window, document,'script',
+'https://connect.facebook.net/en_US/fbevents.js');
+fbq('init', META_PIXEL_ID);
+fbq('track', 'PageView');
 
 (function lazyAnalytics(){
   let loaded = false;
@@ -412,6 +445,13 @@ gtag('config', 'G-SXWZ5613QV');
     sessionStorage.setItem('referrer', document.referrer || '');
     sessionStorage.setItem('device', /Mobi/i.test(navigator.userAgent) ? 'mobile' : 'desktop');
     sessionStorage.setItem('landing_page', window.location.pathname);
+    // Meta click ID, read straight off the URL rather than waiting for the
+    // pixel's _fbc cookie to be written. The pixel is lazy-loaded, so the
+    // cookie may not exist yet at this point, but the URL param always does
+    // if the visit came from an ad click. Captured here so a Meta-sourced
+    // payment can be identified from our own records, independent of
+    // anything Meta's dashboard reports.
+    sessionStorage.setItem('fbclid', params.get('fbclid') || '');
     sessionStorage.setItem('attr_captured', 'true');
   }
 
@@ -637,6 +677,11 @@ gtag('config', 'G-SXWZ5613QV');
     submitBtn.disabled = true;
     submitBtn.textContent = 'One sec…';
     gtag('event', 'signup_submit');
+    // Meta Lead. Deliberately NOT fired on the decline path above: a screened
+    // out person is not a lead, and feeding declines to Meta would train
+    // delivery toward people the program cannot take. Mirrors the existing
+    // split between signup_submit and decline_submit.
+    fbq('track', 'Lead');
 
     const data = {
       event: 'signup',

@@ -21,6 +21,8 @@
 <link rel="dns-prefetch" href="https://www.googletagmanager.com">
 <link rel="preconnect" href="https://www.clarity.ms" crossorigin>
 <link rel="dns-prefetch" href="https://www.clarity.ms">
+<link rel="preconnect" href="https://connect.facebook.net" crossorigin>
+<link rel="dns-prefetch" href="https://connect.facebook.net">
 
 <!-- Compiled Tailwind CSS (shared production build with index.html and
      success.html, generated from tailwind.config.js) — static, cacheable,
@@ -38,6 +40,30 @@ gtag('config', 'G-SXWZ5613QV');
 (function(c,l,a,r,i){
   c[a] = c[a] || function(){ (c[a].q = c[a].q || []).push(arguments); };
 })(window, document, "clarity", "script", "xnay3et4bz");
+
+/* === Meta Pixel: loaded EAGERLY, unlike GA4 and Clarity below ===
+   Same divergence as index.html and for the same reason: the pixel opts
+   out of the lazy pattern, the other two tags keep it.
+
+   On this page the argument is narrower but still holds. InitiateCheckout
+   follows a button press, so the lazy trigger would have fired anyway by
+   then. PageView would not: someone who lands on the paywall, reads the
+   price and leaves without touching anything is precisely the drop-off
+   this test needs to see, and lazy loading makes that person invisible.
+
+   Pixel ID must stay identical on index.html, pay.html and success.html. */
+const META_PIXEL_ID = '1843917183640946'; // Rhythm pixel, Business Manager, 2026-08-19
+
+!function(f,b,e,v,n,t,s)
+{if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+n.queue=[];t=b.createElement(e);t.async=!0;
+t.src=v;s=b.getElementsByTagName(e)[0];
+s.parentNode.insertBefore(t,s)}(window, document,'script',
+'https://connect.facebook.net/en_US/fbevents.js');
+fbq('init', META_PIXEL_ID);
+fbq('track', 'PageView');
 
 (function lazyAnalytics(){
   let loaded = false;
@@ -170,6 +196,28 @@ gtag('config', 'G-SXWZ5613QV');
   const confirmBtn = document.getElementById('confirm-btn');
   const errorMsg = document.getElementById('error-msg');
 
+  // Meta identifiers for the order notes below.
+  // _fbp (browser ID) and _fbc (click ID) are first-party cookies written by
+  // fbevents.js on the landing page. fbclid is the raw URL param, captured
+  // into sessionStorage on index.html, and is the fallback when the cookie
+  // was not written in time.
+  //
+  // Purpose is record-keeping, not tracking: it lets a payment in the Sheet
+  // be tied back to a Meta ad click from our own data, which is what the
+  // bucket split needs. It is also the input Conversions API would require
+  // if we ever add it, so capturing now means the history exists.
+  //
+  // Values are truncated at 255 chars. Razorpay rejects any note value over
+  // 256, and a rejected order means a blocked payment, so this cap is not
+  // cosmetic.
+  function readCookie(key){
+    const hit = document.cookie.split('; ').find(row => row.indexOf(key + '=') === 0);
+    return hit ? hit.slice(key.length + 1) : '';
+  }
+  function metaNote(value){
+    return (value || '').slice(0, 255);
+  }
+
   function showError(text) {
     errorMsg.textContent = text;
     errorMsg.classList.remove('hidden');
@@ -186,6 +234,13 @@ gtag('config', 'G-SXWZ5613QV');
 
   confirmBtn.addEventListener('click', async () => {
     gtag('event', 'paywall_confirm_click');
+    // Meta InitiateCheckout. Fires at the same moment as the GA4 event, on
+    // intent to pay, before the Razorpay modal opens. Value matches
+    // CONFIG.AMOUNT_PAISE so Meta and GA4 cannot drift apart on price.
+    fbq('track', 'InitiateCheckout', {
+      value: CONFIG.AMOUNT_PAISE / 100,
+      currency: 'INR'
+    });
     confirmBtn.disabled = true;
     confirmBtn.textContent = 'Preparing checkout…';
     errorMsg.classList.add('hidden');
@@ -207,7 +262,10 @@ gtag('config', 'G-SXWZ5613QV');
             utm_campaign: sessionStorage.getItem('utm_campaign') || '',
             referrer: sessionStorage.getItem('referrer') || '',
             device: sessionStorage.getItem('device') || '',
-            landing_page: sessionStorage.getItem('landing_page') || ''
+            landing_page: sessionStorage.getItem('landing_page') || '',
+            fbp: metaNote(readCookie('_fbp')),
+            fbc: metaNote(readCookie('_fbc')),
+            fbclid: metaNote(sessionStorage.getItem('fbclid'))
           }
         })
       });

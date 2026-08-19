@@ -18,6 +18,8 @@
 <link rel="dns-prefetch" href="https://www.googletagmanager.com">
 <link rel="preconnect" href="https://www.clarity.ms" crossorigin>
 <link rel="dns-prefetch" href="https://www.clarity.ms">
+<link rel="preconnect" href="https://connect.facebook.net" crossorigin>
+<link rel="dns-prefetch" href="https://connect.facebook.net">
 
 <!-- Compiled Tailwind CSS (shared production build with index.html and
      pay.html, generated from tailwind.config.js) — static, cacheable,
@@ -51,6 +53,30 @@ gtag('config', 'G-SXWZ5613QV');
 (function(c,l,a,r,i){
   c[a] = c[a] || function(){ (c[a].q = c[a].q || []).push(arguments); };
 })(window, document, "clarity", "script", "xnay3et4bz");
+
+/* === Meta Pixel: loaded EAGERLY here, for the same reason GA4 is ===
+   This page carries the Purchase event, which is the only signal Meta can
+   optimise delivery on. The same argument written above for gtag applies
+   with more force: people read three lines and leave, often inside 1.5s
+   with no scroll or tap, so under the lazy pattern fbevents.js would never
+   be fetched and the Purchase would be lost. A cold campaign that cannot
+   see its own conversions cannot learn, so this one is not deferred.
+
+   All three pages now load the pixel eagerly and only Clarity stays lazy
+   here. Pixel ID must stay identical on index.html, pay.html and this
+   page. */
+const META_PIXEL_ID = '1843917183640946'; // Rhythm pixel, Business Manager, 2026-08-19
+
+!function(f,b,e,v,n,t,s)
+{if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+n.queue=[];t=b.createElement(e);t.async=!0;
+t.src=v;s=b.getElementsByTagName(e)[0];
+s.parentNode.insertBefore(t,s)}(window, document,'script',
+'https://connect.facebook.net/en_US/fbevents.js');
+fbq('init', META_PIXEL_ID);
+fbq('track', 'PageView');
 
 (function lazyClarity(){
   let loaded = false;
@@ -113,6 +139,12 @@ gtag('config', 'G-SXWZ5613QV');
       node: sessionStorage.getItem('utm_source') || '',
       campaign: sessionStorage.getItem('utm_campaign') || ''
     });
+    // Meta Purchase, gated on the same verified-payment flag as GA4 above,
+    // and fired BEFORE the flag is consumed below. Order matters: moving
+    // this after the removeItem would fire on nothing.
+    // Analytics only, same as the GA4 event. The Sheet record and the
+    // WhatsApp trigger still come from api/razorpay-webhook.js server-side.
+    fbq('track', 'Purchase', { value: 199, currency: 'INR' });
     // Consume the flag so a refresh of this page does not refire and
     // double-count the same payment.
     sessionStorage.removeItem('payment_confirmed');
