@@ -11,20 +11,107 @@
 <meta name="theme-color" content="#db8b57">
 <meta name="color-scheme" content="light">
 
-<script src="https://cdn.tailwindcss.com"></script>
+<!-- Preconnects for analytics (GA4 + Clarity are lazy-loaded below; the
+     Meta Pixel is not) -->
+<link rel="preconnect" href="https://www.googletagmanager.com" crossorigin>
+<link rel="dns-prefetch" href="https://www.googletagmanager.com">
+<link rel="preconnect" href="https://www.clarity.ms" crossorigin>
+<link rel="dns-prefetch" href="https://www.clarity.ms">
+<link rel="preconnect" href="https://connect.facebook.net" crossorigin>
+<link rel="dns-prefetch" href="https://connect.facebook.net">
+
+<!-- Compiled Tailwind CSS (shared production build with index.html,
+     pay.html and success.html, generated from tailwind.config.js) - static,
+     cacheable, no in-browser JIT compilation.
+
+     Migrated off the cdn.tailwindcss.com Play script on 2026-08-19. That
+     script compiled Tailwind in the browser on every visit, which is a
+     render-blocking third-party fetch plus a JIT pass on a page that is
+     entirely static text, and Tailwind's own documentation says not to ship
+     it. The inline accent colour config it carried is gone with it: those
+     colours now come from the shared build, which is the same source the
+     other three pages already use.
+
+     No rebuild of styles.css was needed for this migration. Every class on
+     this page is already used by the three pages the build was generated
+     from, so the compiled output already contains them. The one exception
+     was the footer colour on the two lines below, previously slate-400 and
+     now slate-500, matching the other pages and clearing the WCAG contrast
+     minimum for body text that slate-400 on white does not meet.
+
+     Consequence to remember: adding a class here that no other page uses
+     will silently not render until styles.css is rebuilt. There is no
+     auto-build. -->
+<link rel="stylesheet" href="/rhythm/styles.css">
+
+<!-- === Analytics: GA4 + Clarity (queued, then lazy-loaded) ===
+     Same pattern as index.html and pay.html: the gtag and Clarity queue
+     stubs are defined synchronously here (cheap, no network call) so any
+     call made on the page gets queued rather than dropped, and only the
+     actual script fetch is deferred until first interaction or idle.
+     IDs are the Rhythm GA4 property and Clarity project, identical to the
+     other pages so these visits join the same funnel rather than forming a
+     separate one. Do not substitute pcosclarity's IDs here. -->
 <script>
-  tailwind.config = {
-    theme: {
-      extend: {
-        colors: {
-          accent: {
-            50:'#fdf3ea', 100:'#fbeadd', 200:'#f3d3b3', 300:'#e8b587',
-            500:'#db8b57', 600:'#db8b57', 700:'#93521f'
-          }
-        }
-      }
-    }
+window.dataLayer = window.dataLayer || [];
+function gtag(){ dataLayer.push(arguments); }
+window.gtag = gtag;
+gtag('js', new Date());
+gtag('config', 'G-SXWZ5613QV');
+
+(function(c,l,a,r,i){
+  c[a] = c[a] || function(){ (c[a].q = c[a].q || []).push(arguments); };
+})(window, document, "clarity", "script", "xnay3et4bz");
+
+/* === Meta Pixel: loaded EAGERLY, unlike GA4 and Clarity above ===
+   Matches the divergence now used on index.html, pay.html and
+   success.html. PageView only. No click or custom events fire from this
+   page: a tap on a footer legal link is not a funnel signal, has no place
+   in the Aggregated Event Measurement ranking, and would add a custom
+   event with no decision attached to it.
+
+   The reason this page carries the pixel at all is continuity. Someone who
+   detours here from the paywall and returns leaves a hole in the session
+   as Meta reads it, and ad review does open the policy pages linked from a
+   paid landing page.
+
+   Pixel ID must stay identical across all five pages. */
+const META_PIXEL_ID = '1843917183640946'; // Rhythm pixel, Business Manager, 2026-08-19
+
+!function(f,b,e,v,n,t,s)
+{if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+n.queue=[];t=b.createElement(e);t.async=!0;
+t.src=v;s=b.getElementsByTagName(e)[0];
+s.parentNode.insertBefore(t,s)}(window, document,'script',
+'https://connect.facebook.net/en_US/fbevents.js');
+fbq('init', META_PIXEL_ID);
+fbq('track', 'PageView');
+
+(function lazyAnalytics(){
+  let loaded = false;
+  function loadAnalytics() {
+    if (loaded) return;
+    loaded = true;
+
+    const ga = document.createElement('script');
+    ga.async = true;
+    ga.src = 'https://www.googletagmanager.com/gtag/js?id=G-SXWZ5613QV';
+    document.head.appendChild(ga);
+
+    const cl = document.createElement('script');
+    cl.async = true;
+    cl.src = 'https://www.clarity.ms/tag/xnay3et4bz';
+    document.head.appendChild(cl);
   }
+  const start = () => { loadAnalytics(); remove(); };
+  function remove(){
+    ['scroll','mousedown','touchstart','keydown'].forEach(ev => window.removeEventListener(ev, start, { passive: true }));
+  }
+  ['scroll','mousedown','touchstart','keydown'].forEach(ev => window.addEventListener(ev, start, { passive: true }));
+  (window.requestIdleCallback || function(f){ setTimeout(f,1500); })(loadAnalytics);
+})();
 </script>
 </head>
 <body class="bg-white text-slate-800 antialiased">
@@ -90,8 +177,8 @@
 
   <!-- MIGRATION DEPENDENCY: footer links hardcoded to /rhythm subpath. If this ever moves to a dedicated domain root, update both to "/terms.html" and "/refund.html" -->
   <footer class="py-10 text-center">
-    <p class="text-xs text-slate-400">&copy; 2026. All rights reserved.</p>
-    <p class="mt-2 text-xs text-slate-400">
+    <p class="text-xs text-slate-500">&copy; 2026. All rights reserved.</p>
+    <p class="mt-2 text-xs text-slate-500">
       <a href="/rhythm/terms.html" class="underline underline-offset-2 hover:text-slate-500">Terms</a>
       <span class="mx-2">·</span>
       <a href="/rhythm/refund.html" class="underline underline-offset-2 hover:text-slate-500">Refund Policy</a>
