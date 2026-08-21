@@ -34,6 +34,7 @@ const NODE_LINKS: Record<string, { utm_source: string; utm_medium: string; utm_c
   s: { utm_source: 'sumeeth', utm_medium: 'node', utm_campaign: 'post1' },
   b: { utm_source: 'bukke', utm_medium: 'node', utm_campaign: 'post1' },
   sc: { utm_source: 'santosh', utm_medium: 'node', utm_campaign: 'post1' },
+  ig: { utm_source: 'ig_bio', utm_medium: 'profile', utm_campaign: 'bio' },
   arpan2: { utm_source: 'arpan', utm_medium: 'node', utm_campaign: 'post2' },
   test1: { utm_source: 'test', utm_medium: 'node', utm_campaign: 'post1' },
   // add new node codes here, e.g.:
