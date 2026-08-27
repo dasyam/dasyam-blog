@@ -31,6 +31,7 @@ const RHYTHM_HOST = 'rhythm.srinivasdasyam.com';
 // new node or new post from an existing node, then push to main.
 const NODE_LINKS: Record<string, { utm_source: string; utm_medium: string; utm_campaign: string }> = {
   a: { utm_source: 'arpan', utm_medium: 'node', utm_campaign: 'post1' },
+  n: { utm_source: 'naman', utm_medium: 'node', utm_campaign: 'post1' },
   s: { utm_source: 'sumeeth', utm_medium: 'node', utm_campaign: 'post1' },
   b: { utm_source: 'bukke', utm_medium: 'node', utm_campaign: 'post1' },
   sc: { utm_source: 'santosh', utm_medium: 'node', utm_campaign: 'post1' },
