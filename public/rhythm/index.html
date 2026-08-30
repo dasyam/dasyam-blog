@@ -9,11 +9,12 @@
 <meta name="theme-color" content="#db8b57">
 <meta name="color-scheme" content="light">
 
-<!-- Preconnects for analytics (still lazy-loaded below) -->
-<link rel="preconnect" href="https://www.googletagmanager.com" crossorigin>
-<link rel="dns-prefetch" href="https://www.googletagmanager.com">
-<link rel="preconnect" href="https://www.clarity.ms" crossorigin>
-<link rel="dns-prefetch" href="https://www.clarity.ms">
+<!-- Preconnect ONLY to origins fetched during the paint window.
+     GA4 and Clarity are lazy-loaded (>=1.5s, or first interaction), so
+     preconnecting them at t=0 opens two DNS+TCP+TLS handshakes that
+     compete for a cold mobile connection during the exact window the
+     hero is trying to paint. Their own script fetch will connect later.
+     connect.facebook.net stays: the pixel is the one tag fetched early. -->
 <link rel="preconnect" href="https://connect.facebook.net" crossorigin>
 <link rel="dns-prefetch" href="https://connect.facebook.net">
 
@@ -21,7 +22,12 @@
      Generated from tailwind.config.js against this file's actual class
      usage — static, cacheable, no in-browser JIT compilation. -->
 <link rel="stylesheet" href="/rhythm/styles.css">
-<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+<!-- Turnstile was here, loaded on every pageview.
+     Moved out: it cost a 27 KiB fetch, ~31ms of main thread and a 42ms
+     forced reflow during the paint window, on every visitor including
+     the large majority who never scroll as far as the form.
+     It is now fetched on approach to the form (see loadTurnstile below),
+     with explicit render. Nothing about the challenge itself changes. -->
 <!-- === Analytics: GA4 + Clarity (queued, then lazy-loaded) ===
      dataLayer/gtag and the Clarity queue stub are defined synchronously
      here (cheap — no network call), so any gtag()/clarity() call made
@@ -63,16 +69,46 @@ gtag('config', 'G-SXWZ5613QV');
    Changing it in one place only produces a funnel that reports partially. */
 const META_PIXEL_ID = '1843917183640946'; // Rhythm pixel, Business Manager, 2026-08-19
 
-!function(f,b,e,v,n,t,s)
-{if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+/* CHANGE 2026-08-30: the queue stub and the init/PageView calls still run
+   synchronously here, exactly as before, so no event is lost or reordered.
+   What moved is only the fbevents.js NETWORK FETCH, which now starts on the
+   first animation frame instead of during head parsing.
+
+   Why: fbevents.js is 109 KiB and burns ~130ms of main thread. Fetched from
+   head it competes with styles.css for a cold connection and then blocks the
+   main thread inside the LCP window. Lab LCP element render delay was 1320ms
+   on a page whose LCP element is a paragraph of system-font text.
+
+   Trade being accepted: a visitor who leaves inside the first painted frame
+   now goes uncounted, where before they were counted. That is the exact
+   population the eager load was protecting. The bet is that the delay is
+   sub-second while the speed gain is multi-second on a cold in-app webview,
+   so the counted population gets larger, not smaller.
+
+   TO REVERT: delete the requestAnimationFrame wrapper and call
+   loadPixelScript() directly on the line after fbq('track', 'PageView'). */
+!function(f,b,e,v,n){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
 n.callMethod.apply(n,arguments):n.queue.push(arguments)};
 if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-n.queue=[];t=b.createElement(e);t.async=!0;
-t.src=v;s=b.getElementsByTagName(e)[0];
-s.parentNode.insertBefore(t,s)}(window, document,'script',
-'https://connect.facebook.net/en_US/fbevents.js');
+n.queue=[]}(window, document);
 fbq('init', META_PIXEL_ID);
 fbq('track', 'PageView');
+
+function loadPixelScript(){
+  if (window.__pixelScriptLoaded) return;
+  window.__pixelScriptLoaded = true;
+  const t = document.createElement('script');
+  t.async = true;
+  t.src = 'https://connect.facebook.net/en_US/fbevents.js';
+  document.head.appendChild(t);
+}
+/* Guarded: an uncaught throw in this head script would stop parsing of
+   everything below it, so nothing here assumes an API exists. */
+if (typeof requestAnimationFrame === 'function') {
+  requestAnimationFrame(function(){ setTimeout(loadPixelScript, 0); });
+} else {
+  setTimeout(loadPixelScript, 0);
+}
 
 (function lazyAnalytics(){
   let loaded = false;
@@ -95,7 +131,26 @@ fbq('track', 'PageView');
     ['scroll','mousedown','touchstart','keydown'].forEach(ev => window.removeEventListener(ev, start, { passive: true }));
   }
   ['scroll','mousedown','touchstart','keydown'].forEach(ev => window.addEventListener(ev, start, { passive: true }));
-  (window.requestIdleCallback || function(f){ setTimeout(f,1500); })(loadAnalytics);
+
+  /* CHANGE 2026-08-30: requestIdleCallback was called with no timeout option.
+     Without one it fires only when the main thread goes idle, which on this
+     page can be several seconds, because fbevents, Turnstile and the GA4
+     bundle were all competing for it. On a slow device it may not fire in the
+     visitor's whole session.
+
+     This matters for reading results, not for speed. It means GA4 and Clarity
+     were loading later than the 1500ms the fallback implies, so the survivor
+     count they report is an undercount of unknown size, and the pre-paint
+     loss measured against Meta's landing-page-view count is an overstatement
+     of unknown size. Neither number was trustworthy as a precise figure.
+
+     A 1500ms timeout caps it, so the fallback path and the native path now
+     behave the same and the number means something. */
+  if (window.requestIdleCallback) {
+    window.requestIdleCallback(loadAnalytics, { timeout: 1500 });
+  } else {
+    setTimeout(loadAnalytics, 1500);
+  }
 })();
 </script>
 </head>
@@ -309,10 +364,13 @@ fbq('track', 'PageView');
         <p id="err-whatsapp" class="mt-1.5 hidden text-xs font-medium text-rose-600">Enter a valid 10-digit number, no spaces or country code.</p>
       </div>
 
-      <div class="cf-turnstile" data-sitekey="0x4AAAAAAD2avPUx-CP9vn9q"
-        data-callback="onTurnstileSuccess" data-expired-callback="onTurnstileExpired"
-        data-error-callback="onTurnstileExpired"></div>
+      <!-- Explicit render (see loadTurnstile below) instead of auto-render on
+           the data- attributes. Auto-render required api.js in <head> on every
+           pageview. The sitekey and the callbacks are unchanged, they just
+           move into the render() call. -->
+      <div id="turnstile-widget"></div>
       <p id="err-turnstile" class="mt-1.5 hidden text-xs font-medium text-rose-600">Please complete the verification above before continuing.</p>
+      <p id="turnstile-degraded" class="mt-1.5 hidden text-xs text-slate-500">Verification could not load on this browser. You can continue anyway.</p>
 
       <!-- No `disabled` attribute, and no dimming based on completeness either:
            disabled buttons can't receive click/submit events at all, which was
@@ -421,9 +479,38 @@ fbq('track', 'PageView');
     PAYWALL_PATH: "/rhythm/pay.html" // MIGRATION DEPENDENCY: hardcoded to /rhythm subpath. If this ever moves to a dedicated domain root, update to "/pay.html"
   };
 
+  /* ---- Safe storage ----------------------------------------------------
+     CHANGE 2026-08-30. Previously every attribution write below called
+     sessionStorage directly. In a webview or browser mode where storage
+     access is blocked, sessionStorage.setItem throws a SecurityError. That
+     exception is uncaught, so script evaluation stops at that line, and
+     everything defined AFTER it never runs: the anchor-scroll handler, the
+     screening checkbox logic, and, critically, form.addEventListener
+     ('submit', ...). The page would look completely normal and the Continue
+     button would do nothing. That is a silent total-zero failure mode and it
+     is invisible in analytics, because the analytics calls are downstream of
+     the same break.
+
+     Every read and write now goes through this wrapper, which falls back to
+     an in-memory object. Attribution survives within the page. It does not
+     survive the hop to pay.html when real storage is blocked, which is a
+     known and accepted degradation: a lead recorded with blank UTMs is worth
+     more than a lead that was never recorded. */
+  const memStore = {};
+  const store = {
+    get(k){
+      try { const v = sessionStorage.getItem(k); return v === null ? (memStore[k] || '') : v; }
+      catch (e) { return memStore[k] || ''; }
+    },
+    set(k, v){
+      memStore[k] = v;
+      try { sessionStorage.setItem(k, v); } catch (e) { /* storage blocked, memory copy stands */ }
+    }
+  };
+
   const params = new URLSearchParams(window.location.search);
   const invite = params.get('invite');
-  if (invite) sessionStorage.setItem('invite_code', invite);
+  if (invite) store.set('invite_code', invite);
 
   // Analytics: get_started_click — both live "Get started" CTAs (hero,
   // why-now). Nav CTA is inside the still-commented-out header, not live,
@@ -437,22 +524,22 @@ fbq('track', 'PageView');
   // Attribution capture — dropped from an earlier build pass, re-added here.
   // Captured once on landing (this is the entry page) and stored so both
   // this page's submit and pay.html's confirm can attach the same context.
-  if (!sessionStorage.getItem('attr_captured')) {
-    sessionStorage.setItem('utm_source', params.get('utm_source') || '');
-    sessionStorage.setItem('utm_medium', params.get('utm_medium') || '');
-    sessionStorage.setItem('utm_campaign', params.get('utm_campaign') || '');
-    sessionStorage.setItem('ref', params.get('ref') || '');
-    sessionStorage.setItem('referrer', document.referrer || '');
-    sessionStorage.setItem('device', /Mobi/i.test(navigator.userAgent) ? 'mobile' : 'desktop');
-    sessionStorage.setItem('landing_page', window.location.pathname);
+  if (!store.get('attr_captured')) {
+    store.set('utm_source', params.get('utm_source') || '');
+    store.set('utm_medium', params.get('utm_medium') || '');
+    store.set('utm_campaign', params.get('utm_campaign') || '');
+    store.set('ref', params.get('ref') || '');
+    store.set('referrer', document.referrer || '');
+    store.set('device', /Mobi/i.test(navigator.userAgent) ? 'mobile' : 'desktop');
+    store.set('landing_page', window.location.pathname);
     // Meta click ID, read straight off the URL rather than waiting for the
     // pixel's _fbc cookie to be written. The pixel is lazy-loaded, so the
     // cookie may not exist yet at this point, but the URL param always does
     // if the visit came from an ad click. Captured here so a Meta-sourced
     // payment can be identified from our own records, independent of
     // anything Meta's dashboard reports.
-    sessionStorage.setItem('fbclid', params.get('fbclid') || '');
-    sessionStorage.setItem('attr_captured', 'true');
+    store.set('fbclid', params.get('fbclid') || '');
+    store.set('attr_captured', 'true');
   }
 
   // Hero badge fixed to "Limited seats" for everyone, matching pay.html.
@@ -462,12 +549,22 @@ fbq('track', 'PageView');
 
   function getAttribution(){
     return {
-      utm_source: sessionStorage.getItem('utm_source') || '',
-      utm_medium: sessionStorage.getItem('utm_medium') || '',
-      utm_campaign: sessionStorage.getItem('utm_campaign') || '',
-      referrer: sessionStorage.getItem('referrer') || '',
-      device: sessionStorage.getItem('device') || '',
-      landing_page: sessionStorage.getItem('landing_page') || ''
+      utm_source: store.get('utm_source') || '',
+      utm_medium: store.get('utm_medium') || '',
+      utm_campaign: store.get('utm_campaign') || '',
+      referrer: store.get('referrer') || '',
+      device: store.get('device') || '',
+      landing_page: store.get('landing_page') || '',
+      /* CHANGE 2026-08-30: fbclid and ref were both captured into storage on
+         landing and then never sent anywhere. The fbclid comment above says
+         it exists so a Meta-sourced payment can be identified from our own
+         records independent of Meta's dashboard, and ref is the node
+         attribution key, but neither was in this return object, so neither
+         ever reached the Sheet from this page. Both need a matching column
+         header in the Sheet or the Apps Script row builder will drop them
+         silently, since it maps strictly on header name. */
+      fbclid: store.get('fbclid') || '',
+      ref: store.get('ref') || ''
     };
   }
 
@@ -578,8 +675,8 @@ fbq('track', 'PageView');
 
     // Turnstile — previously only silently gated the submit button, with no
     // visible reason shown when it was the sole thing blocking submission.
-    const turnstileEl = document.querySelector('.cf-turnstile');
-    const turnstileValid = !!turnstileToken;
+    const turnstileEl = document.getElementById('turnstile-widget');
+    const turnstileValid = !!turnstileToken || turnstileUnavailable;
     document.getElementById('err-turnstile').classList.toggle('hidden', turnstileValid);
     if(!turnstileValid){ ok = false; firstInvalid = firstInvalid || turnstileEl; }
 
@@ -591,16 +688,94 @@ fbq('track', 'PageView');
     return ok;
   }
 
-  // Silent check (no error messages, no scrolling) — just whether everything
-  // required is currently filled in, used to enable/disable Continue live.
+  /* ---- Turnstile: lazy-loaded, and never fatal --------------------------
+     CHANGE 2026-08-30. Two changes, for two different reasons.
+
+     1. LOADING. api.js is no longer in <head>. It is fetched when the visitor
+        gets near the form, or touches any form field, or taps a Get Started
+        CTA, whichever happens first. Visitors who never reach the form never
+        pay for it.
+
+     2. FAILING OPEN. Previously, no token meant no submit, with no timeout
+        and no escape. Embedded in-app webviews (Instagram, and others that
+        restrict third-party storage) are exactly where the challenge is most
+        likely to hang or error, and the failure was silent: the visitor sees
+        a normal form, taps Continue, and one red line appears under a widget
+        that never rendered. If that fires for every visitor from one traffic
+        source, that source reports zero form fills and looks like zero demand.
+
+        The widget now gets 10 seconds from render. If no token has arrived by
+        then, or if it errors outright, submission is unblocked and the lead is
+        sent with cf_turnstile_token: 'unavailable'.
+
+        SERVER SIDE, CHECK THIS: if the Apps Script verifies the token and
+        rejects rows it cannot verify, this change achieves nothing, because
+        the fetch is mode:'no-cors' so the browser never sees the rejection.
+        The Apps Script must accept 'unavailable' and write the row with a
+        flag, so those leads land in the Sheet marked rather than vanishing. */
   let turnstileToken = '';
+  let turnstileUnavailable = false;
+  let turnstileLoadStarted = false;
+  const TURNSTILE_SITEKEY = '0x4AAAAAAD2avPUx-CP9vn9q';
+
   function onTurnstileSuccess(token){
     turnstileToken = token;
     document.getElementById('err-turnstile').classList.add('hidden');
+    document.getElementById('turnstile-degraded').classList.add('hidden');
   }
   function onTurnstileExpired(){
     turnstileToken = '';
   }
+  function degradeTurnstile(){
+    if (turnstileToken) return;
+    turnstileUnavailable = true;
+    document.getElementById('err-turnstile').classList.add('hidden');
+    document.getElementById('turnstile-degraded').classList.remove('hidden');
+    if (window.gtag) gtag('event', 'turnstile_unavailable');
+  }
+
+  window.onTurnstileReady = function(){
+    try {
+      turnstile.render('#turnstile-widget', {
+        sitekey: TURNSTILE_SITEKEY,
+        callback: onTurnstileSuccess,
+        'expired-callback': onTurnstileExpired,
+        'error-callback': degradeTurnstile
+      });
+      setTimeout(degradeTurnstile, 10000);
+    } catch (err) {
+      degradeTurnstile();
+    }
+  };
+
+  function loadTurnstile(){
+    if (turnstileLoadStarted) return;
+    turnstileLoadStarted = true;
+    const s = document.createElement('script');
+    s.async = true;
+    s.defer = true;
+    s.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit&onload=onTurnstileReady';
+    s.onerror = degradeTurnstile;
+    document.head.appendChild(s);
+    // Script itself never arrives (blocked, offline, webview restriction).
+    setTimeout(function(){ if (!window.turnstile) degradeTurnstile(); }, 12000);
+  }
+
+  // Trigger 1: form section approaches the viewport.
+  if ('IntersectionObserver' in window) {
+    const obs = new IntersectionObserver(function(entries){
+      if (entries.some(e => e.isIntersecting)) { loadTurnstile(); obs.disconnect(); }
+    }, { rootMargin: '800px 0px' });
+    obs.observe(document.getElementById('form'));
+  } else {
+    loadTurnstile();
+  }
+  // Trigger 2: any interaction with the form itself.
+  form.addEventListener('focusin', loadTurnstile, { once: true });
+  // Trigger 3: a Get Started tap, which jumps straight to the form.
+  document.querySelectorAll('.cta-get-started').forEach(function(btn){
+    btn.addEventListener('click', loadTurnstile, { once: true });
+  });
 
   // Clear individual field errors as soon as the person fixes them,
   // rather than waiting for the next submit attempt. Also validate on blur
@@ -666,9 +841,9 @@ fbq('track', 'PageView');
         goal: (form.querySelector('input[name=goal]:checked') || {}).value || '',
         routine: document.getElementById('q-routine').value.trim(),
         whatsapp: '+91' + document.getElementById('q-whatsapp').value.trim(),
-        invite: sessionStorage.getItem('invite_code') || '',
+        invite: store.get('invite_code') || '',
         timestamp: new Date().toISOString(),
-        cf_turnstile_token: turnstileToken,
+        cf_turnstile_token: turnstileToken || 'unavailable',
         ...getAttribution()
       });
       return;
@@ -685,20 +860,20 @@ fbq('track', 'PageView');
 
     const data = {
       event: 'signup',
-      cf_turnstile_token: turnstileToken,
+      cf_turnstile_token: turnstileToken || 'unavailable',
       name: document.getElementById('q-name').value.trim(),
       screen: screenValues(),
       goal: (form.querySelector('input[name=goal]:checked') || {}).value || '',
       routine: document.getElementById('q-routine').value.trim(),
       whatsapp: '+91' + document.getElementById('q-whatsapp').value.trim(),
-      invite: sessionStorage.getItem('invite_code') || '',
+      invite: store.get('invite_code') || '',
       declined: false,
       timestamp: new Date().toISOString(),
       ...getAttribution()
     };
 
-    sessionStorage.setItem('lead_name', data.name);
-    sessionStorage.setItem('lead_whatsapp', data.whatsapp);
+    store.set('lead_name', data.name);
+    store.set('lead_whatsapp', data.whatsapp);
     await submitLead(data);
     window.location.href = CONFIG.PAYWALL_PATH;
   });
