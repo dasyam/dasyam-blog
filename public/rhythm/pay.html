@@ -17,18 +17,34 @@
 <meta name="theme-color" content="#db8b57">
 <meta name="color-scheme" content="light">
 
-<link rel="preconnect" href="https://www.googletagmanager.com" crossorigin>
-<link rel="dns-prefetch" href="https://www.googletagmanager.com">
-<link rel="preconnect" href="https://www.clarity.ms" crossorigin>
-<link rel="dns-prefetch" href="https://www.clarity.ms">
+<!-- Preconnect ONLY to origins fetched during the paint window. GA4 and
+     Clarity are lazy-loaded here, so preconnecting them at t=0 spends two
+     DNS+TCP+TLS handshakes during the window the page is trying to paint.
+     connect.facebook.net stays: the pixel is fetched early on this page. -->
 <link rel="preconnect" href="https://connect.facebook.net" crossorigin>
 <link rel="dns-prefetch" href="https://connect.facebook.net">
 
-<!-- Compiled Tailwind CSS (shared production build with index.html and
-     success.html, generated from tailwind.config.js) — static, cacheable,
-     no in-browser JIT compilation. -->
-<link rel="stylesheet" href="/rhythm/styles.css">
-<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<!-- CSS-INLINE-START
+     Rewritten by inline-css.mjs. Run after every Tailwind rebuild:
+         node inline-css.mjs
+     If you forget, this file still works, it is just one round trip slower.
+     A forgotten build step must degrade to slow, never to broken. -->
+<style data-inlined-from="styles.css" data-css-hash="538b3d27017b">*,:after,:before{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgba(59,130,246,.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }::backdrop{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgba(59,130,246,.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }/*! tailwindcss v3.4.19 | MIT License | https://tailwindcss.com*/*,:after,:before{box-sizing:border-box;border:0 solid #e5e7eb}:after,:before{--tw-content:""}:host,html{line-height:1.5;-webkit-text-size-adjust:100%;-moz-tab-size:4;-o-tab-size:4;tab-size:4;font-family:ui-sans-serif,system-ui,sans-serif,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Noto Color Emoji;font-feature-settings:normal;font-variation-settings:normal;-webkit-tap-highlight-color:transparent}body{margin:0;line-height:inherit}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,pre,samp{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,Liberation Mono,Courier New,monospace;font-feature-settings:normal;font-variation-settings:normal;font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}button,input,optgroup,select,textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;letter-spacing:inherit;color:inherit;margin:0;padding:0}button,select{text-transform:none}button,input:where([type=button]),input:where([type=reset]),input:where([type=submit]){-webkit-appearance:button;background-color:transparent;background-image:none}:-moz-focusring{outline:auto}:-moz-ui-invalid{box-shadow:none}progress{vertical-align:baseline}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}summary{display:list-item}blockquote,dd,dl,figure,h1,h2,h3,h4,h5,h6,hr,p,pre{margin:0}fieldset{margin:0}fieldset,legend{padding:0}menu,ol,ul{list-style:none;margin:0;padding:0}dialog{padding:0}textarea{resize:vertical}input::-moz-placeholder,textarea::-moz-placeholder{opacity:1;color:#9ca3af}input::placeholder,textarea::placeholder{opacity:1;color:#9ca3af}[role=button],button{cursor:pointer}:disabled{cursor:default}audio,canvas,embed,iframe,img,object,svg,video{display:block;vertical-align:middle}img,video{max-width:100%;height:auto}[hidden]:where(:not([hidden=until-found])){display:none}.visible{visibility:visible}.static{position:static}.sticky{position:sticky}.top-0{top:0}.z-30{z-index:30}.mx-2{margin-left:.5rem;margin-right:.5rem}.mx-auto{margin-left:auto;margin-right:auto}.mb-1{margin-bottom:.25rem}.mb-2{margin-bottom:.5rem}.mb-3{margin-bottom:.75rem}.mb-4{margin-bottom:1rem}.mb-6{margin-bottom:1.5rem}.mb-7{margin-bottom:1.75rem}.mb-8{margin-bottom:2rem}.ml-4{margin-left:1rem}.mt-1{margin-top:.25rem}.mt-1\.5{margin-top:.375rem}.mt-2{margin-top:.5rem}.mt-3{margin-top:.75rem}.mt-4{margin-top:1rem}.block{display:block}.flex{display:flex}.inline-flex{display:inline-flex}.grid{display:grid}.hidden{display:none}.h-14{height:3.5rem}.h-16{height:4rem}.h-2{height:.5rem}.h-4{height:1rem}.h-5{height:1.25rem}.h-8{height:2rem}.min-h-screen{min-height:100vh}.w-16{width:4rem}.w-2{width:.5rem}.w-4{width:1rem}.w-5{width:1.25rem}.w-8{width:2rem}.w-full{width:100%}.min-w-\[28px\]{min-width:28px}.max-w-\[540px\]{max-width:540px}.flex-1{flex:1 1 0%}.shrink-0{flex-shrink:0}.rotate-\[-45deg\]{--tw-rotate:-45deg;transform:translate(var(--tw-translate-x),var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.cursor-pointer{cursor:pointer}.list-disc{list-style-type:disc}.list-none{list-style-type:none}.flex-col{flex-direction:column}.items-start{align-items:flex-start}.items-center{align-items:center}.justify-center{justify-content:center}.justify-between{justify-content:space-between}.gap-2{gap:.5rem}.gap-3{gap:.75rem}.gap-4{gap:1rem}.gap-5{gap:1.25rem}.space-y-1>:not([hidden])~:not([hidden]){--tw-space-y-reverse:0;margin-top:calc(.25rem*(1 - var(--tw-space-y-reverse)));margin-bottom:calc(.25rem*var(--tw-space-y-reverse))}.overflow-hidden{overflow:hidden}.scroll-smooth{scroll-behavior:smooth}.rounded{border-radius:.25rem}.rounded-2xl{border-radius:1rem}.rounded-\[50\%_50\%_50\%_0\]{border-radius:50% 50% 50% 0}.rounded-full{border-radius:9999px}.rounded-xl{border-radius:.75rem}.border{border-width:1px}.border-0{border-width:0}.border-b{border-bottom-width:1px}.border-r{border-right-width:1px}.border-t{border-top-width:1px}.border-accent-200{--tw-border-opacity:1;border-color:rgb(243 211 179/var(--tw-border-opacity,1))}.border-rose-400{--tw-border-opacity:1;border-color:rgb(251 113 133/var(--tw-border-opacity,1))}.border-slate-200{--tw-border-opacity:1;border-color:rgb(226 232 240/var(--tw-border-opacity,1))}.border-slate-300{--tw-border-opacity:1;border-color:rgb(203 213 225/var(--tw-border-opacity,1))}.bg-accent-50{--tw-bg-opacity:1;background-color:rgb(253 243 234/var(--tw-bg-opacity,1))}.bg-accent-50\/40{background-color:hsla(28,83%,95%,.4)}.bg-accent-600{--tw-bg-opacity:1;background-color:rgb(219 139 87/var(--tw-bg-opacity,1))}.bg-accent-700{--tw-bg-opacity:1;background-color:rgb(147 82 31/var(--tw-bg-opacity,1))}.bg-slate-100{--tw-bg-opacity:1;background-color:rgb(241 245 249/var(--tw-bg-opacity,1))}.bg-white{--tw-bg-opacity:1;background-color:rgb(255 255 255/var(--tw-bg-opacity,1))}.bg-white\/80{background-color:hsla(0,0%,100%,.8)}.p-3{padding:.75rem}.p-4{padding:1rem}.p-5{padding:1.25rem}.px-3{padding-left:.75rem;padding-right:.75rem}.px-3\.5{padding-left:.875rem;padding-right:.875rem}.px-5{padding-left:1.25rem;padding-right:1.25rem}.px-6{padding-left:1.5rem;padding-right:1.5rem}.py-1\.5{padding-top:.375rem;padding-bottom:.375rem}.py-10{padding-top:2.5rem;padding-bottom:2.5rem}.py-14{padding-top:3.5rem;padding-bottom:3.5rem}.py-2{padding-top:.5rem;padding-bottom:.5rem}.py-3{padding-top:.75rem;padding-bottom:.75rem}.py-3\.5{padding-top:.875rem;padding-bottom:.875rem}.py-4{padding-top:1rem;padding-bottom:1rem}.py-5{padding-top:1.25rem;padding-bottom:1.25rem}.py-6{padding-top:1.5rem;padding-bottom:1.5rem}.pb-14{padding-bottom:3.5rem}.pl-5{padding-left:1.25rem}.pt-0\.5{padding-top:.125rem}.pt-12{padding-top:3rem}.pt-2{padding-top:.5rem}.pt-8{padding-top:2rem}.text-center{text-align:center}.text-2xl{font-size:1.5rem;line-height:2rem}.text-3xl{font-size:1.875rem;line-height:2.25rem}.text-4xl{font-size:2.25rem;line-height:2.5rem}.text-base{font-size:1rem;line-height:1.5rem}.text-lg{font-size:1.125rem;line-height:1.75rem}.text-sm{font-size:.875rem;line-height:1.25rem}.text-xl{font-size:1.25rem;line-height:1.75rem}.text-xs{font-size:.75rem;line-height:1rem}.font-bold{font-weight:700}.font-extrabold{font-weight:800}.font-medium{font-weight:500}.font-semibold{font-weight:600}.uppercase{text-transform:uppercase}.italic{font-style:italic}.leading-snug{line-height:1.375}.leading-tight{line-height:1.25}.tracking-tight{letter-spacing:-.025em}.tracking-widest{letter-spacing:.1em}.text-accent-700{--tw-text-opacity:1;color:rgb(147 82 31/var(--tw-text-opacity,1))}.text-red-600{--tw-text-opacity:1;color:rgb(220 38 38/var(--tw-text-opacity,1))}.text-rose-600{--tw-text-opacity:1;color:rgb(225 29 72/var(--tw-text-opacity,1))}.text-slate-500{--tw-text-opacity:1;color:rgb(100 116 139/var(--tw-text-opacity,1))}.text-slate-600{--tw-text-opacity:1;color:rgb(71 85 105/var(--tw-text-opacity,1))}.text-slate-700{--tw-text-opacity:1;color:rgb(51 65 85/var(--tw-text-opacity,1))}.text-slate-800{--tw-text-opacity:1;color:rgb(30 41 59/var(--tw-text-opacity,1))}.text-slate-900{--tw-text-opacity:1;color:rgb(15 23 42/var(--tw-text-opacity,1))}.text-slate-900\/80{color:rgba(15,23,42,.8)}.text-white{--tw-text-opacity:1;color:rgb(255 255 255/var(--tw-text-opacity,1))}.underline{text-decoration-line:underline}.line-through{text-decoration-line:line-through}.underline-offset-2{text-underline-offset:2px}.antialiased{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}.accent-accent-600{accent-color:#db8b57}.shadow{--tw-shadow:0 1px 3px 0 rgba(0,0,0,.1),0 1px 2px -1px rgba(0,0,0,.1);--tw-shadow-colored:0 1px 3px 0 var(--tw-shadow-color),0 1px 2px -1px var(--tw-shadow-color)}.shadow,.shadow-sm{box-shadow:var(--tw-ring-offset-shadow,0 0 #0000),var(--tw-ring-shadow,0 0 #0000),var(--tw-shadow)}.shadow-sm{--tw-shadow:0 1px 2px 0 rgba(0,0,0,.05);--tw-shadow-colored:0 1px 2px 0 var(--tw-shadow-color)}.outline-none{outline:2px solid transparent;outline-offset:2px}.ring{--tw-ring-offset-shadow:var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);--tw-ring-shadow:var(--tw-ring-inset) 0 0 0 calc(3px + var(--tw-ring-offset-width)) var(--tw-ring-color);box-shadow:var(--tw-ring-offset-shadow),var(--tw-ring-shadow),var(--tw-shadow,0 0 #0000)}.ring-rose-100{--tw-ring-opacity:1;--tw-ring-color:rgb(255 228 230/var(--tw-ring-opacity,1))}.blur{--tw-blur:blur(8px)}.blur,.filter{filter:var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow)}.backdrop-blur{--tw-backdrop-blur:blur(8px);-webkit-backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia);backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia)}.transition-colors{transition-property:color,background-color,border-color,text-decoration-color,fill,stroke;transition-timing-function:cubic-bezier(.4,0,.2,1);transition-duration:.15s}.transition-transform{transition-property:transform;transition-timing-function:cubic-bezier(.4,0,.2,1);transition-duration:.15s}.first\:border-t-0:first-child{border-top-width:0}.focus-within\:border-accent-500:focus-within{--tw-border-opacity:1;border-color:rgb(219 139 87/var(--tw-border-opacity,1))}.focus-within\:ring:focus-within{--tw-ring-offset-shadow:var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);--tw-ring-shadow:var(--tw-ring-inset) 0 0 0 calc(3px + var(--tw-ring-offset-width)) var(--tw-ring-color);box-shadow:var(--tw-ring-offset-shadow),var(--tw-ring-shadow),var(--tw-shadow,0 0 #0000)}.focus-within\:ring-accent-100:focus-within{--tw-ring-opacity:1;--tw-ring-color:rgb(251 234 221/var(--tw-ring-opacity,1))}.hover\:border-slate-400:hover{--tw-border-opacity:1;border-color:rgb(148 163 184/var(--tw-border-opacity,1))}.hover\:bg-accent-800:hover{--tw-bg-opacity:1;background-color:rgb(118 66 25/var(--tw-bg-opacity,1))}.hover\:text-accent-800:hover{--tw-text-opacity:1;color:rgb(118 66 25/var(--tw-text-opacity,1))}.hover\:text-slate-500:hover{--tw-text-opacity:1;color:rgb(100 116 139/var(--tw-text-opacity,1))}.focus\:border-accent-500:focus{--tw-border-opacity:1;border-color:rgb(219 139 87/var(--tw-border-opacity,1))}.focus\:outline-none:focus{outline:2px solid transparent;outline-offset:2px}.focus\:ring:focus{--tw-ring-offset-shadow:var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);--tw-ring-shadow:var(--tw-ring-inset) 0 0 0 calc(3px + var(--tw-ring-offset-width)) var(--tw-ring-color);box-shadow:var(--tw-ring-offset-shadow),var(--tw-ring-shadow),var(--tw-shadow,0 0 #0000)}.focus\:ring-accent-100:focus{--tw-ring-opacity:1;--tw-ring-color:rgb(251 234 221/var(--tw-ring-opacity,1))}.disabled\:cursor-not-allowed:disabled{cursor:not-allowed}.disabled\:opacity-60:disabled{opacity:.6}.group[open] .group-open\:rotate-45{--tw-rotate:45deg;transform:translate(var(--tw-translate-x),var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.has-\[\:checked\]\:border-accent-500:has(:checked){--tw-border-opacity:1;border-color:rgb(219 139 87/var(--tw-border-opacity,1))}.has-\[\:checked\]\:bg-accent-50:has(:checked){--tw-bg-opacity:1;background-color:rgb(253 243 234/var(--tw-bg-opacity,1))}@media (min-width:640px){.sm\:p-6{padding:1.5rem}.sm\:px-7{padding-left:1.75rem;padding-right:1.75rem}.sm\:py-8{padding-top:2rem;padding-bottom:2rem}.sm\:text-3xl{font-size:1.875rem;line-height:2.25rem}.sm\:text-4xl{font-size:2.25rem;line-height:2.5rem}.sm\:text-5xl{font-size:3rem;line-height:1}}
+</style>
+<!-- CSS-INLINE-END -->
+
+<!-- CHANGE 2026-08-30: added defer.
+     This tag had neither async nor defer, which makes it parser-blocking.
+     HTML parsing stopped dead here until checkout.js finished downloading
+     AND executing, so nothing below this line, including the entire page
+     body, could render. On a cold connection in an in-app webview that is
+     the single largest delay on this page.
+
+     defer rather than async, deliberately: deferred scripts run in document
+     order before DOMContentLoaded, so Razorpay is guaranteed present by the
+     time any human can tap the button. async would not guarantee ordering.
+     The click handler also guards on it now, in case the fetch fails. -->
+<script src="https://checkout.razorpay.com/v1/checkout.js" defer></script>
 
 <script>
 window.dataLayer = window.dataLayer || [];
@@ -54,16 +70,32 @@ gtag('config', 'G-SXWZ5613QV');
    Pixel ID must stay identical on index.html, pay.html and success.html. */
 const META_PIXEL_ID = '1843917183640946'; // Rhythm pixel, Business Manager, 2026-08-19
 
-!function(f,b,e,v,n,t,s)
-{if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+/* CHANGE 2026-08-30: identical treatment to index.html. The queue stub and
+   the init/PageView calls still run synchronously, so no event is lost or
+   reordered. Only the 109 KiB fbevents.js network fetch moved past first
+   paint. The PageView-for-drop-off argument above is unaffected: the call is
+   queued immediately and flushes the moment the script lands.
+   TO REVERT: call loadPixelScript() directly instead of via the frame. */
+!function(f,b,e,v,n){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
 n.callMethod.apply(n,arguments):n.queue.push(arguments)};
 if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-n.queue=[];t=b.createElement(e);t.async=!0;
-t.src=v;s=b.getElementsByTagName(e)[0];
-s.parentNode.insertBefore(t,s)}(window, document,'script',
-'https://connect.facebook.net/en_US/fbevents.js');
+n.queue=[]}(window, document);
 fbq('init', META_PIXEL_ID);
 fbq('track', 'PageView');
+
+function loadPixelScript(){
+  if (window.__pixelScriptLoaded) return;
+  window.__pixelScriptLoaded = true;
+  const t = document.createElement('script');
+  t.async = true;
+  t.src = 'https://connect.facebook.net/en_US/fbevents.js';
+  document.head.appendChild(t);
+}
+if (typeof requestAnimationFrame === 'function') {
+  requestAnimationFrame(function(){ setTimeout(loadPixelScript, 0); });
+} else {
+  setTimeout(loadPixelScript, 0);
+}
 
 (function lazyAnalytics(){
   let loaded = false;
@@ -84,7 +116,15 @@ fbq('track', 'PageView');
     ['scroll','mousedown','touchstart','keydown'].forEach(ev => window.removeEventListener(ev, start, { passive: true }));
   }
   ['scroll','mousedown','touchstart','keydown'].forEach(ev => window.addEventListener(ev, start, { passive: true }));
-  (window.requestIdleCallback || function(f){ setTimeout(f,1500); })(loadAnalytics);
+  /* CHANGE 2026-08-30: requestIdleCallback had no timeout, so it fired only
+     when the main thread went idle, which on a page loading Razorpay's
+     checkout bundle could be several seconds or never. Capped so the native
+     and fallback paths behave identically and the numbers mean something. */
+  if (window.requestIdleCallback) {
+    window.requestIdleCallback(loadAnalytics, { timeout: 1500 });
+  } else {
+    setTimeout(loadAnalytics, 1500);
+  }
 })();
 </script>
 </head>
@@ -162,16 +202,52 @@ fbq('track', 'PageView');
     AMOUNT_PAISE: 19900 // ₹199 due today (early bird price)
   };
 
+  /* ---- Safe storage ----------------------------------------------------
+     CHANGE 2026-08-30. This mattered more here than anywhere else on the
+     site, because the very first statements in this script touched storage.
+
+     In any webview or browser mode where storage access is blocked,
+     sessionStorage.setItem throws a SecurityError. Uncaught, script
+     evaluation stops on that line, and every statement below it never runs:
+     the badge text, the greeting, the name and number summary, the
+     missing-details guard, and the click listener on the pay button.
+
+     The visible result was a paywall that says "Hey there", shows two blank
+     rows where the person's name and number should be, still reads "Private
+     invite" on the badge because the overwrite never ran, and has a Pay
+     button that does absolutely nothing when tapped. No error, no console
+     message the visitor can see, and no analytics event, because the gtag
+     calls are downstream of the same break.
+
+     That is a total loss at the payment step, which is the most expensive
+     place on the site to lose someone. Every read and write now falls back
+     to memory. Attribution degrades, the payment still completes. */
+  const memStore = {};
+  const store = {
+    get(k){
+      try { const v = sessionStorage.getItem(k); return v === null ? (memStore[k] || '') : v; }
+      catch (e) { return memStore[k] || ''; }
+    },
+    set(k, v){
+      memStore[k] = v;
+      try { sessionStorage.setItem(k, v); } catch (e) { /* storage blocked, memory copy stands */ }
+    },
+    remove(k){
+      delete memStore[k];
+      try { sessionStorage.removeItem(k); } catch (e) {}
+    }
+  };
+
   // One-tap direct link support: ?name=...&whatsapp=... overrides sessionStorage
   // if present. Normal form -> pay.html flow is untouched when params are absent.
   const urlParams = new URLSearchParams(window.location.search);
   const paramName = urlParams.get('name');
   const paramWhatsapp = urlParams.get('whatsapp');
-  if (paramName) sessionStorage.setItem('lead_name', paramName);
-  if (paramWhatsapp) sessionStorage.setItem('lead_whatsapp', paramWhatsapp);
+  if (paramName) store.set('lead_name', paramName);
+  if (paramWhatsapp) store.set('lead_whatsapp', paramWhatsapp);
 
-  const name = sessionStorage.getItem('lead_name');
-  const whatsapp = sessionStorage.getItem('lead_whatsapp');
+  const name = store.get('lead_name');
+  const whatsapp = store.get('lead_whatsapp');
 
   // Badge fixed to "Limited seats" for everyone, node and cold traffic alike.
   // "Private invite" implied a relationship that isn't true for cold (Meta)
@@ -232,6 +308,41 @@ fbq('track', 'PageView');
     showError('We could not find your details. Please go back to the form and fill it in, or use the link sent to you.');
   }
 
+  /* ---- Back-navigation restore -----------------------------------------
+     CHANGE 2026-08-30. Same class of bug as the one on index.html, at a more
+     expensive step.
+
+     Every failure path here already resets the button. The success path does
+     not, because it navigates to success.html and the page is done. But the
+     browser keeps this page in the back-forward cache, so pressing back
+     restores the live DOM exactly as it was left, with the button disabled
+     and reading "Confirming…" or "Waiting on checkout…". Scripts do not
+     re-run on a bfcache restore, so nothing puts it back.
+
+     Anyone who pays, lands on success, then presses back to re-read the
+     terms or check the refund policy is looking at a dead payment button.
+     The same applies on Android when a UPI intent hands off to a payment app
+     and the visitor returns without completing.
+
+     The missing-details guard is re-evaluated rather than assumed, so a
+     visitor who arrived on a bare URL stays correctly blocked instead of
+     being handed a working button that would take an unidentified payment. */
+  function resetConfirmButton(){
+    if (!name || !whatsapp) {
+      confirmBtn.disabled = true;
+      confirmBtn.textContent = 'Details missing';
+      return;
+    }
+    confirmBtn.disabled = false;
+    confirmBtn.textContent = 'Pay & confirm my spot →';
+  }
+
+  window.addEventListener('pageshow', function(evt){
+    if (!evt.persisted) return; // fresh load, script ran, nothing stale
+    errorMsg.classList.add('hidden');
+    resetConfirmButton();
+  });
+
   confirmBtn.addEventListener('click', async () => {
     gtag('event', 'paywall_confirm_click');
     // Meta InitiateCheckout. Fires at the same moment as the GA4 event, on
@@ -250,28 +361,44 @@ fbq('track', 'PageView');
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          // CHANGE 2026-08-30: `plan` is now what selects the price. The
+          // server holds the amount table and ignores anything the browser
+          // claims. `amount` is still sent so the server can cross-check the
+          // two and fail loudly if this file and the table ever drift, rather
+          // than quietly charging one of the two numbers. See create-order.js.
+          plan: 'standard',
           amount: CONFIG.AMOUNT_PAISE,
-          currency: 'INR',
           receipt: `rhythm_${Date.now()}`,
           notes: {
             name: name || '',
             whatsapp: whatsapp || '',
-            invite: sessionStorage.getItem('invite_code') || '',
-            utm_source: sessionStorage.getItem('utm_source') || '',
-            utm_medium: sessionStorage.getItem('utm_medium') || '',
-            utm_campaign: sessionStorage.getItem('utm_campaign') || '',
-            referrer: sessionStorage.getItem('referrer') || '',
-            device: sessionStorage.getItem('device') || '',
-            landing_page: sessionStorage.getItem('landing_page') || '',
+            invite: store.get('invite_code') || '',
+            utm_source: store.get('utm_source') || '',
+            utm_medium: store.get('utm_medium') || '',
+            utm_campaign: store.get('utm_campaign') || '',
+            referrer: store.get('referrer') || '',
+            device: store.get('device') || '',
+            landing_page: store.get('landing_page') || '',
             fbp: metaNote(readCookie('_fbp')),
             fbc: metaNote(readCookie('_fbc')),
-            fbclid: metaNote(sessionStorage.getItem('fbclid'))
+            fbclid: metaNote(store.get('fbclid'))
           }
         })
       });
 
       if (!orderRes.ok) throw new Error('Could not start checkout. Please try again.');
       const order = await orderRes.json();
+
+      /* CHANGE 2026-08-30: explicit guard. checkout.js is now deferred, so
+         it is guaranteed to have executed before DOMContentLoaded and thus
+         before any human can tap. This covers the remaining case where the
+         fetch itself failed (blocked, offline, webview restriction). Without
+         it, `new Razorpay(...)` throws a ReferenceError that lands in the
+         generic catch below and tells the person "Something went wrong",
+         which points them at nothing they can act on. */
+      if (typeof Razorpay === 'undefined') {
+        throw new Error('Checkout could not load. Please check your connection and try again, or message us on WhatsApp.');
+      }
 
       const options = {
         key: 'rzp_live_TJEwEnoMcVqP0Z',
@@ -303,7 +430,7 @@ fbq('track', 'PageView');
               // truth that forwards to the Sheet + triggers notifyNewMember
               // this client-side confirm is just for immediate redirect,
               // not relied on for record-keeping.
-              sessionStorage.setItem('payment_confirmed', 'true');
+              store.set('payment_confirmed', 'true');
               window.location.href = CONFIG.SUCCESS_PATH;
             } else {
               showError('Payment could not be verified. If money was deducted, message us on WhatsApp and we will sort it out.');
@@ -323,8 +450,8 @@ fbq('track', 'PageView');
             // and distinct from payment.failed below (this is an
             // abandonment, not a decline).
             gtag('event', 'payment_dropped', {
-              node: sessionStorage.getItem('utm_source') || '',
-              campaign: sessionStorage.getItem('utm_campaign') || ''
+              node: store.get('utm_source') || '',
+              campaign: store.get('utm_campaign') || ''
             });
             confirmBtn.disabled = false;
             confirmBtn.textContent = 'Pay & confirm my spot →';
@@ -340,8 +467,8 @@ fbq('track', 'PageView');
         // (see payment_dropped above). Keeps "tried and failed" separate
         // from "gave up."
         gtag('event', 'payment_failed', {
-          node: sessionStorage.getItem('utm_source') || '',
-          campaign: sessionStorage.getItem('utm_campaign') || '',
+          node: store.get('utm_source') || '',
+          campaign: store.get('utm_campaign') || '',
           reason: (response && response.error && response.error.description) || ''
         });
         showError('Payment failed. Please try again or use a different method.');

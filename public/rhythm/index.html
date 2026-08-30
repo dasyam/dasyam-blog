@@ -514,13 +514,14 @@ if (typeof requestAnimationFrame === 'function') {
      more than a lead that was never recorded. */
   const memStore = {};
   const store = {
+    blocked: false,
     get(k){
       try { const v = sessionStorage.getItem(k); return v === null ? (memStore[k] || '') : v; }
-      catch (e) { return memStore[k] || ''; }
+      catch (e) { store.blocked = true; return memStore[k] || ''; }
     },
     set(k, v){
       memStore[k] = v;
-      try { sessionStorage.setItem(k, v); } catch (e) { /* storage blocked, memory copy stands */ }
+      try { sessionStorage.setItem(k, v); } catch (e) { store.blocked = true; }
     }
   };
 
@@ -891,7 +892,29 @@ if (typeof requestAnimationFrame === 'function') {
     store.set('lead_name', data.name);
     store.set('lead_whatsapp', data.whatsapp);
     await submitLead(data);
-    window.location.href = CONFIG.PAYWALL_PATH;
+
+    /* CHANGE 2026-08-30: hand the identity across in the URL, but only when
+       real storage is unavailable.
+
+       The memory fallback above keeps this page working when storage is
+       blocked, but memory does not survive a navigation. pay.html would then
+       find no name and no number, hit its own missing-details guard, and
+       correctly refuse to take an unidentified payment. Honest, and still a
+       lost sale.
+
+       pay.html already accepts ?name= and ?whatsapp= and prefers them over
+       storage, so the identity can travel in the URL instead. This is
+       deliberately conditional rather than always-on: putting a phone number
+       in the query string for every visitor would leak it into browser
+       history and into the referrer sent onward, which is a privacy cost the
+       normal flow has no reason to pay. Only the visitors who would
+       otherwise be stuck get it. */
+    let destination = CONFIG.PAYWALL_PATH;
+    if (store.blocked) {
+      destination += '?name=' + encodeURIComponent(data.name) +
+                     '&whatsapp=' + encodeURIComponent(data.whatsapp);
+    }
+    window.location.href = destination;
   });
 
   /* ---- Back-navigation restore -----------------------------------------
