@@ -878,6 +878,49 @@ if (typeof requestAnimationFrame === 'function') {
     window.location.href = CONFIG.PAYWALL_PATH;
   });
 
+  /* ---- Back-navigation restore -----------------------------------------
+     CHANGE 2026-08-30. Pre-existing bug, present before this patch series.
+
+     The submit handler sets the button to disabled / "One sec" and then
+     navigates to pay.html. It never resets. On back navigation Safari and
+     Chrome restore this page from the back-forward cache, which restores the
+     live DOM exactly as it was left, including the disabled button. Script
+     does not re-run on a bfcache restore, so nothing ever puts it back. The
+     visitor is looking at a permanently dead Continue button with no way
+     forward and no error. A hard reload clears it; nobody does that.
+
+     The second half matters more and is invisible. Turnstile tokens are
+     single-use and short-lived. The token in memory after a bfcache restore
+     has already been spent on the previous submit. Fixing only the button
+     would let the visitor resubmit with a consumed token, which siteverify
+     rejects, which the Apps Script treats as 'failed', which is the one
+     remaining hard-reject path. The row would be destroyed server-side and
+     mode:'no-cors' guarantees the browser never learns about it. So the
+     widget is reset here too, and a fresh degrade timer armed with it.
+
+     turnstileUnavailable is deliberately NOT cleared. If verification was
+     already established as broken on this browser, it is still broken, and
+     re-arming the block would strand the visitor a second time. */
+  window.addEventListener('pageshow', function(evt){
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Continue';
+
+    if (!evt.persisted) return; // fresh load, script ran, nothing stale
+
+    turnstileToken = '';
+    if (window.turnstile) {
+      try {
+        turnstile.reset('#turnstile-widget');
+        setTimeout(degradeTurnstile, 10000);
+      } catch (err) {
+        degradeTurnstile();
+      }
+    } else if (turnstileLoadStarted) {
+      // Script was requested but never arrived. It will not arrive now.
+      degradeTurnstile();
+    }
+  });
+
   async function submitLead(data){
     if(!CONFIG.SHEET_ENDPOINT){
       console.warn('SHEET_ENDPOINT not set yet — lead not persisted:', data);
